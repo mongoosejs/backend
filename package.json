@@ -1,0 +1,19 @@
+{
+  "name": "mongoosejs-search",
+  "author": "Valeri Karpov <val@karpov.io>",
+  "version": "1.0.0",
+  "dependencies": {
+    "cheerio": "1.0.0-rc.2",
+    "cors": "2.8.5",
+    "express": "4.x",
+    "mongoose": "5.x"
+  },
+  "devDependencies": {
+    "mocha": "5.x",
+    "pkg": "4.3.7"
+  },
+  "scripts": {
+    "compile": "pkg ./index.js --output ./bin/search-api --public",
+    "start": "node ."
+  }
+}
