@@ -16,7 +16,7 @@ module.exports = async function search(context, req) {
   let Content;
   if (conn == null) {
     conn = mongoose.createConnection(config.uri, { useNewUrlParser: true, useUnifiedTopology: true });
-    await conn;
+    await conn.asPromise();
   }
 
   Content = conn.model('Content', contentSchema, 'Content');

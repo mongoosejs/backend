@@ -62,6 +62,8 @@ typings/
 
 package-lock.json
 
-.config*
+.config.js
+.config/development.js
+.config/production.js
 
 bin
