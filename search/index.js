@@ -15,7 +15,7 @@ contentSchema.index({ title: 'text', body: 'text' });
 module.exports = async function search(context, req) {
   let Content;
   if (conn == null) {
-    conn = mongoose.createConnection(config.uri, { useNewUrlParser: true, useUnifiedTopology: true });
+    conn = mongoose.createConnection(config.uri);
     await conn.asPromise();
   }
 
