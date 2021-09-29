@@ -26,7 +26,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
 
   const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
-  const { action, issue, sender } = context.body;
+  const { action, issue, sender } = req.body;
 
   if (action === 'opened' && issue != null) {
     // Opened new issue
