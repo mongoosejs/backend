@@ -3,8 +3,8 @@
   "author": "Valeri Karpov <val@karpov.io>",
   "version": "1.1.2",
   "dependencies": {
-    "@octokit/auth-token": "2.5.0",
     "@octokit/auth-app": "2.4.3",
+    "@octokit/auth-token": "2.5.0",
     "axios": "0.21.4",
     "cheerio": "1.0.0-rc.2",
     "mongoose": "6.x"

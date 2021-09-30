@@ -54,13 +54,6 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
       }
     }).then(res => res.data);
     console.log(res.data);
-    const notification = await axios.post('https://hooks.slack.com/services/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', {
-    headers: {
-      'Content-type':'application/json'
-    },
-    body: JSON.stringify({text: 'A Pro Subscriber has posted an issue!'})
-  }).then((res) => res.data);
-  console.log(notification);
   }
 
   
