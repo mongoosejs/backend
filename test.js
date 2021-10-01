@@ -1,7 +1,7 @@
 
 const axios = require('axios');
 const mongoose = require('mongoose');
-const slackToken = 'xoxb-80341368871-2550790998148-Mbj9RlvHoIJuffemEB0asPDP';
+
 const subscriberSchema = new mongoose.Schema({
     email: { type: String, required: true },
     githubUsername: { type: String, required: true },
@@ -23,7 +23,7 @@ async function run() {
 }
 
 // test();
-
+/*
 async function test() {
     let conn = mongoose.createConnection('mongodb+srv://mongoose21:ggknyTbObfxa6kF7@cluster0-xvnqv.mongodb.net/mongoose?retryWrites=true&w=majority');
     await conn.asPromise();
@@ -34,3 +34,5 @@ async function test() {
    });
    console.log('done');
 }
+
+*/
