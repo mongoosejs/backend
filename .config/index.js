@@ -8,5 +8,6 @@ if (process.env.NODE_ENV) {
     module.exports = require('./development');
   }
 } else {
+  console.log('using production');
   module.exports = require('./production');
 }
