@@ -13,7 +13,7 @@
     "mocha": "5.x"
   },
   "scripts": {
-    "start": "func start",
+    "start": "env NODE_ENV=development func start",
     "deploy": "rm -rf ./node_modules && npm install --production && func azure functionapp publish mongoosejs",
     "test": "echo \"No tests yet...\"",
     "lint": "eslint ."
