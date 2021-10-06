@@ -16,7 +16,6 @@ const subscriberSchema = new mongoose.Schema({
 });
 
 module.exports = azureWrapper(async function webhookGithubApp(context, req) {
-  console.log(req.body);
   let Subscriber;
   if (conn == null) {
     conn = mongoose.createConnection(config.uri);
