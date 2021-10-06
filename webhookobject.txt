@@ -19,7 +19,7 @@
 [2021-10-06T20:29:34.868Z]       repos_url: 'https://api.github.com/users/mongoosejs/repos',
 [2021-10-06T20:29:34.869Z]       events_url: 'https://api.github.com/users/mongoosejs/events{/privacy}',
 [2021-10-06T20:29:34.872Z]       received_events_url: 'https://api.github.com/users/mongoosejs/received_events',
-[2021-10-06T20:29:34.874Z]       type: 'Organization',
+[2021-10-06T20:29:34.874Z]       type: 'Organization', // want this over target_type
 [2021-10-06T20:29:34.877Z]       site_admin: false
 [2021-10-06T20:29:34.882Z]     },
 [2021-10-06T20:29:34.884Z]     repository_selection: 'all',
@@ -194,3 +194,5 @@ make a request to the github api to load the organization's members
 - need installation id
 
 Store all those members in the Subscriber model of the database
+
+ask val about handling private members

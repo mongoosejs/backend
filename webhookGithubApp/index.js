@@ -16,8 +16,7 @@ const subscriberSchema = new mongoose.Schema({
 });
 
 module.exports = azureWrapper(async function webhookGithubApp(context, req) {
-    console.log(req.body);
-    /*
+  console.log(req.body);
   let Subscriber;
   if (conn == null) {
     conn = mongoose.createConnection(config.uri);
@@ -26,38 +25,15 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
 
   Subscriber = conn.model('Subscriber', subscriberSchema, 'Subscriber');
 
-  const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+  // const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
-  const { action, issue, sender } = req.body;
+  const { installation, sender } = req.body;
 
-  if (action === 'opened' && issue != null) {
-    // Opened new issue
-    const orgs = await axios.get(sender['organizations_url']).then(res => res.data);
-    const orgNames = orgs.map(org => org.login);
-    const orgIds = orgs.map(org => org.id);
-
-    const subscriber = await Subscriber.findOne({
-      $or: [
-        { githubUsername: sender.login },
-        { githubUserId: sender.id },
-        { githubOrganization: { $in: orgNames } },
-        { githubOrganizationId: { $in: orgIds } }
-      ]
-    });
-
-    if (subscriber == null) {
-      return { ok: 1 };
-    }
-
-    // Is a subscriber, add priority label
-    const res = await axios.post(`${issue.url}/labels`, { labels: ['priority'] }, {
-      headers: {
-        authorization: `bearer ${token}`
-      }
-    }).then(res => res.data);
-    console.log(res.data);
+  if(installation.account.type == 'Organization') {
+    const membersList =  await axios.get(`https://api.github.com/orgs/${installation.account.login}/members`).then((res) => res.data);
+    console.log('members', membersList);
+    const memberName = membersList.map((name) => name.login);
+    await Subscriber.insertMany(memberName);
   }
-
-  return { ok: 1 };
-  */
+  return {ok: 1};
 });
