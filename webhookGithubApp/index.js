@@ -43,7 +43,9 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
     const orgId = installation.account.id;
     for (let i = 0; i < membersList.length; i++) {
       let userInfo = await axios.get(`https://api.github.com/users/${membersList[i].login}`);
+
       if(await Subscriber.find({email: userInfo.email})) continue;
+
       await Subscriber.create({
         email: userInfo.email,
         githubUsername: membersList[i].login,
