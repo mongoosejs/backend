@@ -48,12 +48,35 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
     }
 
     // Is a subscriber, add priority label
-    const res = await axios.post(`${issue.url}/labels`, { labels: ['priority'] }, {
+    await axios.post(`${issue.url}/labels`, { labels: ['priority'] }, {
       headers: {
         authorization: `bearer ${token}`
       }
-    }).then(res => res.data);
-    console.log(res.data);
+    });
+
+    // Send to Slack
+    const url = 'https://slack.com/api/chat.postMessage';
+    await axios.post(url, {
+      channel: '#pro-notifications',
+      blocks: [
+        {type: 'divider'},
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: ${issue.title}`
+          }
+        },
+        {type: 'divider'},
+        {
+          type: 'section',
+          text: {
+            type: 'mrkdwn',
+            text: `*DESCRIPTION* \n\n ${issue.body}`
+          }
+        }, 
+      ]
+    }, { headers: { authorization: `Bearer ${config.slackToken}` } });
   }
 
   return { ok: 1 };
