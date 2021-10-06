@@ -31,9 +31,18 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
 
   if(installation.account.type == 'Organization') {
     const membersList =  await axios.get(`https://api.github.com/orgs/${installation.account.login}/members`).then((res) => res.data);
-    console.log('members', membersList);
-    const memberName = membersList.map((name) => name.login);
-    await Subscriber.insertMany(memberName);
+    const memberOrg = installation.account.login;
+    const orgId = installation.account.id;
+    for (let i = 0; i < membersList.length; i++) {
+      let userInfo = await axios.get(`https://api.github.com/users/${membersList[i].login}`);
+      await Subscriber.create({
+        email: userInfo.email,
+        githubUsername: membersList[i].login,
+        githubUserId: membersList[i].id,
+        githubOrganization: memberOrg,
+        githubOrganizationId: orgId
+      });
+    }
   }
   return {ok: 1};
 });
