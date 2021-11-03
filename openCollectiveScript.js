@@ -1,6 +1,7 @@
 const axios = require('axios');
-const mongoose = require('mongoose');
+const {WebClient, LogLevel} = require('@slack/web-api');
 const config = require('./.config/.config.js');
+const fs = require('fs');
 
  run().catch(err => console.log(err));
 
@@ -18,12 +19,22 @@ async function run() {
     }
   }
 
+  fs.writeFileSync('sponsors.html', sponsors.join(''));
+
+  const client = new WebClient(config.slackToken);
+  const res = await client.files.upload({
+    channels: '#pro-notifications',
+    initial_comment: 'Sponsors',
+    file: fs.createReadStream('./sponsors.html')
+  });
+  console.log(res);
+/*
   const url = 'https://slack.com/api/chat.postMessage';
   const res = await axios.post(url, {
     channel: '#pro-notifications',
     text: sponsors.join('')
   }, { headers: { authorization: `Bearer ${config.slackToken}` } });
-  
+  */
 
   // console.log('Done', res.data);
 }
