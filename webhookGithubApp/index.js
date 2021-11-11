@@ -3,7 +3,7 @@
 const axios = require('axios');
 const azureWrapper = require('../util/azureWrapper');
 const { createAppAuth } = require('@octokit/auth-token');
-const config = require('../.config/.config.js');
+const config = require('../.config');
 const connect = require('../src/db');
 
 module.exports = azureWrapper(async function webhookGithubApp(context, req) {
