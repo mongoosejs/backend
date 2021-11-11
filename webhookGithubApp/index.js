@@ -4,27 +4,18 @@ const axios = require('axios');
 const azureWrapper = require('../util/azureWrapper');
 const { createAppAuth } = require('@octokit/auth-token');
 const config = require('../.config/.config.js');
-const mongoose = require('mongoose');
-
-let conn = null;
-const subscriberSchema = new mongoose.Schema({
-  githubOrgMembers: [],
-  githubOrganization: { type: String },
-  githubOrganizationId: { type: String }
-});
+const connect = require('../src/db');
 
 module.exports = azureWrapper(async function webhookGithubApp(context, req) {
-  let Subscriber;
-  if (conn == null) {
-    conn = mongoose.createConnection(config.uri);
-    await conn.asPromise();
-  }
+  const conn = await connect();
 
-  Subscriber = conn.model('Subscriber', subscriberSchema, 'Subscriber');
+  const Subscriber = conn.model('Subscriber');
 
   const { installation, sender } = req.body;
 
-  if(installation.account.type !== 'Organization') { return ;}
+  if (installation.account.type !== 'Organization') {
+    return { ok: 1, ignored: true };
+  }
 
   const auth = createAppAuth({
     id: config.githubAppId,
@@ -34,12 +25,21 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
     clientSecret: config.githubClientSecret
   });
   const { token } = await auth({ type: 'installation' });
-  const membersList =  await axios.get(`https://api.github.com/orgs/${installation.account.login}/members`, { headers: {
+  const githubOrganizationMembers =  await axios.get(`https://api.github.com/orgs/${installation.account.login}/members`, { headers: {
     authorization: `bearer ${token}`
   }}).then((res) => res.data);
 
-  const memberOrg = installation.account.login;
-  const orgId = installation.account.id;
-  await Subscriber.create({githubOrganization: memberOrg, githubOrganizationId: orgId, githubOrgMembers: membersList});
+  const githubOrganization = installation.account.login;
+  const githubOrganizationId = installation.account.id;
+
+  const subscriber = await Subscriber.findOne({ $or: [{ githubOrganization }, { githubOrganizationId }] });
+  if (Subscriber == null) {
+    return { ok: 1, ignored: true };
+  }
+  
+  subscriber.installationId = installation.id;
+  subscriber.githubOrganizationMembers = githubOrganizationMembers;
+  await subscriber.save();
+  
   return {ok: 1};
 });

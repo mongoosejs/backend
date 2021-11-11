@@ -4,25 +4,11 @@ const axios = require('axios');
 const azureWrapper = require('../util/azureWrapper');
 const { createTokenAuth } = require('@octokit/auth-token');
 const config = require('../.config');
-const mongoose = require('mongoose');
-
-let conn = null;
-const subscriberSchema = new mongoose.Schema({
-  email: { type: String, required: true },
-  githubUsername: { type: String, required: true },
-  githubUserId: { type: String },
-  githubOrganization: { type: String },
-  githubOrganizationId: { type: String }
-});
+const connect = require('../src/db');
 
 module.exports = azureWrapper(async function webhookGitHubComment(context, req) {
-  let Subscriber;
-  if (conn == null) {
-    conn = mongoose.createConnection(config.uri);
-    await conn.asPromise();
-  }
-
-  Subscriber = conn.model('Subscriber', subscriberSchema, 'Subscriber');
+  const conn = await connect();
+  Subscriber = conn.model('Subscriber');
 
   const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
