@@ -1,12 +1,13 @@
 'use strict';
 
-const axios = require('axios');
 const azureWrapper = require('../util/azureWrapper');
-const { createAppAuth } = require('@octokit/auth-token');
-const config = require('../.config');
 const connect = require('../src/db');
+const githubApp = require('../src/integrations/githubApp');
 
-module.exports = azureWrapper(async function webhookGithubApp(context, req) {
+module.exports = azureWrapper(webhookGithubApp);
+module.exports.rawFunction = webhookGithubApp;
+
+async function webhookGithubApp(context, req) {
   const conn = await connect();
 
   const Subscriber = conn.model('Subscriber');
@@ -17,17 +18,7 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
     return { ok: 1, ignored: true };
   }
 
-  const auth = createAppAuth({
-    id: config.githubAppId,
-    privateKey: config.githubPem,
-    installationId: installation.id,
-    clientId: config.githubClientId,
-    clientSecret: config.githubClientSecret
-  });
-  const { token } = await auth({ type: 'installation' });
-  const githubOrganizationMembers =  await axios.get(`https://api.github.com/orgs/${installation.account.login}/members`, { headers: {
-    authorization: `bearer ${token}`
-  }}).then((res) => res.data);
+  const githubOrganizationMembers = await githubApp.getOrganizationMembers(installation.id, installation.account.login);
 
   const githubOrganization = installation.account.login;
   const githubOrganizationId = installation.account.id;
@@ -42,4 +33,4 @@ module.exports = azureWrapper(async function webhookGithubApp(context, req) {
   await subscriber.save();
   
   return {ok: 1};
-});
+}

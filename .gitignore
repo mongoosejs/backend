@@ -67,3 +67,5 @@ package-lock.json
 .config/production.js
 
 bin
+
+data

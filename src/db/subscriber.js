@@ -8,7 +8,11 @@ const subscriberSchema = new mongoose.Schema({
   githubUserId: { type: String },
   githubOrganization: { type: String },
   githubOrganizationId: { type: String },
-  githubOrganizationMembers: [{ type: String }],
+  githubOrganizationMembers: [
+    new mongoose.Schema({
+      login: { type: String, required: true },
+      id: { type: String, required: true }
+    }, { _id: false })],
   installationId: { type: String }
 });
 

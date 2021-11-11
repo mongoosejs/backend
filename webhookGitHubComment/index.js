@@ -25,7 +25,9 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
         { githubUsername: sender.login },
         { githubUserId: sender.id },
         { githubOrganization: { $in: orgNames } },
-        { githubOrganizationId: { $in: orgIds } }
+        { githubOrganizationId: { $in: orgIds } },
+        { 'githubOrganizationMembers.login': sender.login },
+        { 'githubOrganizationMembers.id': sender.id }
       ]
     });
 

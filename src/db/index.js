@@ -1,5 +1,6 @@
 'use strict';
 
+const config = require('../../.config');
 const mongoose = require('mongoose');
 
 let conn = null;
