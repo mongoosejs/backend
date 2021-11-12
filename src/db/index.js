@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 let conn = null;
 
 const subscriberSchema = require('./subscriber');
+const taskSchema = require('./task');
 
 module.exports = async function connect() {
   if (conn == null) {
@@ -13,6 +14,7 @@ module.exports = async function connect() {
     await conn.asPromise();
   }
   conn.model('Subscriber', subscriberSchema, 'Subscriber');
+  conn.model('Task', taskSchema, 'Task');
 
   return conn;
 };
