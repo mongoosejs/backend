@@ -2,17 +2,16 @@
 
 const assert = require('assert');
 const sinon = require('sinon');
-const axios = require('axios');
-const {getChangelog} = require('../src/getChangelog');
-const { createRelease } = require('../src/createRelease');
+const changelog = require('../src/getChangelog');
+const release = require('../src/createRelease');
+const {createReleaseFromChangelog} = require('../githubReleaseScript.js');
 
 
 describe('Automated Releases', function() {
     it('creates a draft release', async function() {
-        sinon.stub(axios, 'post').returns({status: 200});
-        const changelog = await getChangelog();
-        assert.ok(changelog);
-        const release = await createRelease(changelog);
-        assert.equal(release.status, 200);
+      sinon.stub(changelog, 'getChangelog');
+      sinon.stub(release, 'createRelease');
+      const result = await createReleaseFromChangelog();
+      assert.ok(result);
     });
 });
