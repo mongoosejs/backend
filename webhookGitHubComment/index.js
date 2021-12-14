@@ -2,13 +2,14 @@
 
 const axios = require('axios');
 const azureWrapper = require('../util/azureWrapper');
+const createReleaseFromChangelog = require('../src/actions/createReleaseFromChangelog');
 const { createTokenAuth } = require('@octokit/auth-token');
 const config = require('../.config');
 const connect = require('../src/db');
 
 module.exports = azureWrapper(async function webhookGitHubComment(context, req) {
   const conn = await connect();
-  Subscriber = conn.model('Subscriber');
+  const Subscriber = conn.model('Subscriber');
   const Task = conn.model('Task');
 
   const task = await Task.create({
@@ -19,7 +20,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
 
   const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
-  const { action, issue, sender } = req.body;
+  const { action, issue, sender, ref, ref_type } = req.body;
 
   await task.log(`Action: ${action}`);
 
@@ -75,6 +76,9 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
         }, 
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+  } else if (ref != null && ref_type === 'tag') {
+    // Assume tag was created, so create a release
+    await createReleaseFromChangelog(ref);
   } else {
     await task.log('Skipped');
   }

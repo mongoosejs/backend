@@ -15,7 +15,7 @@ describe('createReleaseFromChangelog', function() {
   it('creates a draft release', async function() {
     sinon.stub(githubOAuth, 'getChangelog').callsFake(() => Promise.resolve(changelog));
     sinon.stub(githubOAuth, 'createRelease').callsFake(() => Promise.resolve());
-    await createReleaseFromChangelog();
+    await createReleaseFromChangelog('6.1.1');
 
     const [tagAndName, body] = githubOAuth.createRelease.getCall(0).args;
     assert.equal(tagAndName, '6.1.1');
