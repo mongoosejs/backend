@@ -9,13 +9,23 @@ const connect = require('../src/db');
 module.exports = azureWrapper(async function webhookGitHubComment(context, req) {
   const conn = await connect();
   Subscriber = conn.model('Subscriber');
+  const Task = conn.model('Task');
+
+  const task = await Task.create({
+    method: req.method,
+    url: req.url,
+    params: req.body
+  });
 
   const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
   const { action, issue, sender } = req.body;
 
+  await task.log(`Action: ${action}`);
+
   if (action === 'opened' && issue != null) {
     // Opened new issue
+    await task.log('Opened new issue');
     const orgs = await axios.get(sender['organizations_url']).then(res => res.data);
     const orgNames = orgs.map(org => org.login);
     const orgIds = orgs.map(org => org.id);
@@ -65,6 +75,8 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
         }, 
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+  } else {
+    await task.log('Skipped');
   }
 
   return { ok: 1 };
