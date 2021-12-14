@@ -1,6 +1,9 @@
 'use strict';
 
+const TaskSchema = require('../src/db/task');
 const assert = require('assert');
+const config = require('../.config');
+const mongoose = require('mongoose');
 const sinon = require('sinon');
 const githubOAuth = require('../src/integrations/githubOAuth');
 const createReleaseFromChangelog = require('../src/actions/createReleaseFromChangelog');
@@ -12,10 +15,22 @@ const changelog = `
 `.trim();
 
 describe('createReleaseFromChangelog', function() {
+  let Task;
+  let task;
+  before(() => mongoose.connect(config.uri));
+  before(() => {
+    Task = mongoose.model('Task', TaskSchema);
+  });
+  after(() => mongoose.disconnect());
+
+  beforeEach(async function() {
+    task = await Task.create({});
+  });
+
   it('creates a draft release', async function() {
     sinon.stub(githubOAuth, 'getChangelog').callsFake(() => Promise.resolve(changelog));
     sinon.stub(githubOAuth, 'createRelease').callsFake(() => Promise.resolve());
-    await createReleaseFromChangelog('6.1.1');
+    await createReleaseFromChangelog(task)('6.1.1');
 
     const [tagAndName, body] = githubOAuth.createRelease.getCall(0).args;
     assert.equal(tagAndName, '6.1.1');

@@ -2,11 +2,11 @@
 
 const githubOAuth = require('../integrations/githubOAuth');
 
-module.exports = async function createReleaseFromChangelog(ref) {
+module.exports = task => async function createReleaseFromChangelog(ref) {
   if (ref == null) {
     return;
   }
-  const changelog = await githubOAuth.getChangelog();
+  const changelog = await task.sideEffect(githubOAuth.getChangelog, {});
   const lines = changelog.split('\n');
   let changelogLines = null;
   for (let i = 0; i < lines.length; ++i) {
@@ -27,5 +27,7 @@ module.exports = async function createReleaseFromChangelog(ref) {
   let body = changelogLines;
   const tagAndName = body[0].slice(0, body[0].indexOf(' '));
   body = body.join('\n');
-  await githubOAuth.createRelease(tagAndName, body);
+  await task.sideEffect(function createRelease({ tagAndName, body }) {
+    return githubOAuth.createRelease(tagAndName, body);
+  }, { tagAndName, body });
 };

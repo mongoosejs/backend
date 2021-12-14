@@ -78,7 +78,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
   } else if (ref != null && ref_type === 'tag') {
     // Assume tag was created, so create a release
-    await createReleaseFromChangelog(ref);
+    await createReleaseFromChangelog(task)(ref);
   } else {
     await task.log('Skipped');
   }
