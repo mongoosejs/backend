@@ -16,10 +16,6 @@ describe('webhookGithubApp', function() {
     Subscriber = conn.model('Subscriber');
   });
 
-  after(async function() {
-    await conn.close();
-  });
-
   beforeEach(() => conn.dropDatabase());
 
   it('works', async function() {
