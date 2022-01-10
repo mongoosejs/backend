@@ -29,6 +29,24 @@ module.exports = {
       throw err;
     }
   },
+  async getUserFromToken(githubAccessToken) {
+    const { token } = await createTokenAuth(githubAccessToken)();
+    const headers = {
+      authorization: `bearer ${token}`,
+      accept: 'application/vnd.github.v3+json'
+    };
+    return axios.get('https://api.github.com/user', { headers }).then(res => res.data);
+  },
+  getAccessToken(code) {
+    const body = {
+      client_id: config.githubOAuthClientId,
+      client_secret: config.githubOAuthClientSecret,
+      code
+    };
+    const opts = { headers: { accept: 'application/json' } };
+    return axios.post(`https://github.com/login/oauth/access_token`, body, opts).
+      then(res => res.data);
+  },
   getChangelog() {
     const url = host + '/repos/Automattic/mongoose/contents/CHANGELOG.md';
     const headers = {

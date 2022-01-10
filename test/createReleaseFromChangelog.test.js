@@ -2,8 +2,6 @@
 
 const TaskSchema = require('../src/db/task');
 const assert = require('assert');
-const config = require('../.config');
-const mongoose = require('mongoose');
 const sinon = require('sinon');
 const githubOAuth = require('../src/integrations/githubOAuth');
 const createReleaseFromChangelog = require('../src/actions/createReleaseFromChangelog');
@@ -17,11 +15,9 @@ const changelog = `
 describe('createReleaseFromChangelog', function() {
   let Task;
   let task;
-  before(() => mongoose.connect(config.uri));
   before(() => {
-    Task = mongoose.model('Task', TaskSchema);
+    Task = conn.model('Task', TaskSchema);
   });
-  after(() => mongoose.disconnect());
 
   beforeEach(async function() {
     task = await Task.create({});
