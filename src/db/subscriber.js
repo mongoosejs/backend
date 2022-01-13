@@ -3,7 +3,12 @@
 const mongoose = require('mongoose');
 
 const subscriberSchema = new mongoose.Schema({
-  email: { type: String, required: true },
+  status: {
+    type: String,
+    enum: ['enabled', 'disabled'],
+    default: 'enabled'
+  },
+  email: { type: String },
   githubUsername: { type: String, required: true },
   githubUserId: { type: String },
   githubOrganization: { type: String },
