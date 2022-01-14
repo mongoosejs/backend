@@ -1,12 +1,11 @@
 const axios = require('axios');
 const {WebClient} = require('@slack/web-api');
-const config = require('./.config/development.js')
+const config = require('./.config/config.js')
 const readline = require('readline');
 const r1 = readline.createInterface({
     input: process.stdin,
     output: process.stdout
 });
-
 
  run().catch(err => console.log(err));
 
