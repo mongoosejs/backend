@@ -10,7 +10,7 @@
           "post",
           "options"
         ],
-        "route": "webhookGithubSponsors"
+        "route": "verifyGithubAccessToken"
       },
       {
         "type": "http",
