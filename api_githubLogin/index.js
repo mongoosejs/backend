@@ -44,11 +44,16 @@ async function githubLogin(context, req) {
   const githubAccessToken = data['access_token'];
   const { login, id } = await task.sideEffect(githubOAuth.getUserFromToken, githubAccessToken);
 
+  const subscriber = await task.sideEffect(function getSubscriberByGithubId({ id }) {
+    return Subscriber.findOne({ githubUserId: id });
+  }, { id });
+
   const token = await AccessToken.create({
     githubAccessToken,
     githubUserId: id,
-    githubUserName: login
+    githubUserName: login,
+    subscriberId: subscriber == null ? null : subscriber._id
   });
 
-  return { ok: 1, token: token._id };
+  return { ok: 1, token, subscriber };
 }

@@ -8,7 +8,7 @@ const accessTokenSchema = new mongoose.Schema({
   githubAccessToken: { type: String, required: true },
   githubUserId: { type: String, required: true },
   githubUserName: { type: String, required: true },
-  subscriberId: { type: 'ObjectId' }
+  subscriberId: { type: 'ObjectId', ref: 'Subscriber' }
 });
 
 module.exports = accessTokenSchema;
