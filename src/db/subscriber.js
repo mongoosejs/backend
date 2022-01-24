@@ -10,7 +10,7 @@ const subscriberSchema = new mongoose.Schema({
   },
   email: { type: String },
   githubUsername: { type: String, required: true },
-  githubUserId: { type: String },
+  githubUserId: { type: String, required: true },
   githubOrganization: { type: String },
   githubOrganizationId: { type: String },
   githubOrganizationMembers: [
@@ -18,7 +18,10 @@ const subscriberSchema = new mongoose.Schema({
       login: { type: String, required: true },
       id: { type: String, required: true }
     }, { _id: false })],
-  installationId: { type: String }
+  installationId: { type: String },
+  companyName: { type: String },
+  description: { type: String },
+  logo: { type: String }
 });
 
 module.exports = subscriberSchema;
