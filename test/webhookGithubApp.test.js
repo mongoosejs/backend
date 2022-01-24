@@ -22,6 +22,7 @@ describe('webhookGithubApp', function() {
     await Subscriber.create({
       email: 'val@karpov.io',
       githubUsername: 'vkarpov15',
+      githubUserId: '1234',
       githubOrganization: 'mastering-js'
     });
 
