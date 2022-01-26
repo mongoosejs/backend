@@ -28,8 +28,7 @@ const GithubSponsorsParams = new Archetype({
     },
     tier: {
       name: {
-        $type: 'string',
-        $required: true
+        $type: 'string'
       },
       is_one_time: {
         $type: 'boolean'
