@@ -20,13 +20,11 @@ const GithubEntity = new Archetype({
 
 const GithubSponsorsParams = new Archetype({
   action: {
-    $type: 'string',
-    $required: true
+    $type: 'string'
   },
   sponsorship: {
     sponsor: {
-      $type: GithubEntity,
-      $required: true
+      $type: GithubEntity
     },
     tier: {
       name: {
@@ -42,8 +40,7 @@ const GithubSponsorsParams = new Archetype({
     }
   },
   sender: {
-    $type: GithubEntity,
-    $required: true
+    $type: GithubEntity
   }
 }).compile('GithubSponsorsParams');
 
@@ -63,6 +60,10 @@ async function webhookGithubSponsors(context, req) {
   });
 
   const { action, sponsorship, sender } = new GithubSponsorsParams(req.body);
+
+  if (action == null || sponsorship == null) {
+    return $ignored;
+  }
 
   let subscriber;
   switch (action) {
