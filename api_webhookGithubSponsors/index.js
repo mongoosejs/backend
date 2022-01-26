@@ -61,7 +61,7 @@ async function webhookGithubSponsors(context, req) {
   const { action, sponsorship, sender } = new GithubSponsorsParams(req.body);
 
   if (action == null || sponsorship == null) {
-    return $ignored;
+    return { $ignored: 1 };
   }
 
   let subscriber;
