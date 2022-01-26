@@ -21,7 +21,8 @@ const subscriberSchema = new mongoose.Schema({
   installationId: { type: String },
   companyName: { type: String },
   description: { type: String },
-  logo: { type: String }
+  logo: { type: String },
+  url: { type: String }
 });
 
 module.exports = subscriberSchema;
