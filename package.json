@@ -8,6 +8,7 @@
     "@slack/web-api": "^6.4.0",
     "archetype": "0.13.0",
     "axios": "0.21.4",
+    "azure-functions-core-tools": "^3.0.3904",
     "cheerio": "1.0.0-rc.2",
     "mongoose": "6.x"
   },
