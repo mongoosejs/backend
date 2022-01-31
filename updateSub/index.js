@@ -20,17 +20,15 @@ module.exports = azureWrapper(async function (context, req) {
     const params = { authorization: req.headers.authorization };
 
     const res = await verifyGithubAccessToken({ task, conn })(params);
-
-    if(res) {
-        console.log('success')
-        const sub = await Subscriber.findById();
-        sub.companyName;
-        sub.description;
-        sub.logo;
-        await sub.save();
-        return;
-    } else {
-        console.log('error');
+    if(!res) {
+        console.log('error', res);
         return;
     }
+    console.log('POST')
+    const sub = await Subscriber.findById({_id: req.body.user});
+    sub.companyName = req.body.company;
+    sub.description = req.body.description;
+    sub.logo = req.body.logo;
+    await sub.save();
+    return sub;
 });
