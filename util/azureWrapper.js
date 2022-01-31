@@ -4,6 +4,12 @@ const fs = require('fs');
 
 const isDev = process.env.NODE_ENV === 'development';
 
+if (isDev) {
+  try {
+    fs.mkdirSync('./data');
+  } catch (err) {}
+}
+
 module.exports = function azureWrapper(fn) {
   return async function wrappedFunction(context, req) {
     console.log(new Date(), req.method, req.url);
