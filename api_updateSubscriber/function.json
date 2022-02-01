@@ -10,7 +10,7 @@
           "post",
           "options"
         ],
-        "route": "updateSub"
+        "route": "updateSubscriber"
       },
       {
         "type": "http",

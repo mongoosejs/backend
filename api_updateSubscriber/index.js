@@ -11,17 +11,19 @@ module.exports = azureWrapper(async function (context, req) {
     const conn = await connect();
     const Task = conn.model('Task');
     const Subscriber = conn.model('Subscriber');
+    const Token = conn.model('AccessToken');
+
+    const token = await Token.findById({_id: req.headers.accessToken});
 
     const task = await Task.create({
         method: req.method,
         url: req.url,
         params: req.body
     });
-    const params = { authorization: req.headers.authorization };
 
-    const res = await verifyGithubAccessToken({ task, conn })(params);
-    if(!res) {
-        console.log('error', res);
+
+    if(token.subscriberId != req.body.user) {
+        console.log('error, mismatch');
         return;
     }
     console.log('POST')
