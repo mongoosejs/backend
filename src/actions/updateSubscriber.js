@@ -13,7 +13,7 @@ const UpdateSubscriberParams = new Archetype({
     $type: mongoose.Types.ObjectId,
     $required: true
   },
-  company: {
+  companyName: {
     $type: 'string',
     $required: true
   },
@@ -28,7 +28,6 @@ const UpdateSubscriberParams = new Archetype({
 }).compile('UpdateSubscriberParams');
 
 module.exports = ({ task, conn }) => async function updateSubscriber(params) {
-  console.log('AF', conn.models);
   const { AccessToken, Subscriber } = conn.models;
 
   const { authorization, _id, companyName, description, logo } = new UpdateSubscriberParams(params);
