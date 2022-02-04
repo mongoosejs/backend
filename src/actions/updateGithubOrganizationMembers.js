@@ -43,8 +43,6 @@ module.exports = ({ task, conn }) => async function updateGithubOrganizationMemb
     ) :
     await githubOAuth.getOrganizationMembers(subscriber.githubOrganization);
 
-  console.log('AX', subscriber.installationId, githubOrganizationMembers);
-
   subscriber.githubOrganizationMembers = githubOrganizationMembers;
 
   await subscriber.save();
