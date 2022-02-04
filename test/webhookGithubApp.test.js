@@ -55,8 +55,8 @@ describe('webhookGithubApp', function() {
     };
 
     sinon.stub(githubApp, 'getOrganizationMembers').callsFake(() => Promise.resolve([
-      { login: 'vkarpov15', id: '1234' },
-      { login: 'IslandRhythms', id: '5678' }
+      { login: 'vkarpov15', id: '1234', avatar_url: 'dog1.jpg' },
+      { login: 'IslandRhythms', id: '5678', avatar_url: 'dog2.jpg' }
     ]));
 
     const res = await webhookGithubApp(null, { body });
@@ -66,8 +66,8 @@ describe('webhookGithubApp', function() {
     assert.ok(sub);
     assert.equal(sub.installationId, 20657751);
     assert.deepEqual(sub.githubOrganizationMembers.toObject(), [
-      { login: 'vkarpov15', id: '1234' },
-      { login: 'IslandRhythms', id: '5678' }
+      { login: 'vkarpov15', id: '1234', avatar: 'dog1.jpg' },
+      { login: 'IslandRhythms', id: '5678', avatar: 'dog2.jpg' }
     ]);
   });
 });

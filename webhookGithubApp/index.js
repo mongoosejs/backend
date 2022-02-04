@@ -3,7 +3,7 @@
 const azureWrapper = require('../util/azureWrapper');
 const connect = require('../src/db');
 const githubApp = require('../src/integrations/githubApp');
-const util = require('util');
+const updateGithubOrganizationMembers = require('../src/actions/updateGithubOrganizationMembers');
 
 module.exports = azureWrapper(webhookGithubApp);
 module.exports.rawFunction = webhookGithubApp;
@@ -26,10 +26,6 @@ async function webhookGithubApp(context, req) {
     return { ok: 1, ignored: true };
   }
 
-  const githubOrganizationMembers = await githubApp.getOrganizationMembers(installation.id, installation.account.login);
-
-  await task.log(`Got ${githubOrganizationMembers.length} org members`, { githubOrganizationMembers });
-
   const githubOrganization = installation.account.login;
   const githubOrganizationId = installation.account.id;
 
@@ -40,8 +36,11 @@ async function webhookGithubApp(context, req) {
   }
   
   subscriber.installationId = installation.id;
-  subscriber.githubOrganizationMembers = githubOrganizationMembers;
   await subscriber.save();
+
+  await updateGithubOrganizationMembers({ task, conn })({
+    _id: subscriber._id
+  });
   
   await task.log('Success');
 

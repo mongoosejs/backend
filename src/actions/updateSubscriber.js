@@ -48,7 +48,7 @@ module.exports = ({ task, conn }) => async function updateSubscriber(params) {
   }, { _id });
   assert.ok(subscriber != null, `Subscriber ${_id} not found`);
 
-  const priorOrg = params.githubOrganization;
+  const priorOrg = subscriber.githubOrganization;
   subscriber.set(omit(['_id', 'authorization'], params));
 
   if (params.githubOrganization != null && params.githubOrganization !== priorOrg) {

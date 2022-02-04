@@ -7,10 +7,6 @@ const githubApp = require('../integrations/githubApp');
 const githubOAuth = require('../integrations/githubOAuth');
 
 const UpdateGithubOrganizationMembersParams = new Archetype({
-  authorization: {
-    $type: 'string',
-    $required: true
-  },
   _id: {
     $type: mongoose.Types.ObjectId,
     $required: true
@@ -18,18 +14,10 @@ const UpdateGithubOrganizationMembersParams = new Archetype({
 }).compile('UpdateGithubOrganizationMembersParams');
 
 module.exports = ({ task, conn }) => async function updateGithubOrganizationMembers(params) {
-  const { AccessToken, Subscriber } = conn.models;
+  const { Subscriber } = conn.models;
 
   params = new UpdateGithubOrganizationMembersParams(params);
-  const { authorization, _id } = params;
-
-  /*const token = await task.sideEffect(async function findAccessToken({ _id }) {
-    return AccessToken.findById({ _id }).exec();
-  }, { _id: authorization });
-  assert.ok(token, `Token ${authorization} not found`);
-
-  assert.ok(token.subscriberId.toString() === _id.toString(),
-    'Not authorized to update this subscriber');*/
+  const { _id } = params;
 
   const subscriber = await task.sideEffect(async function findSubscriber({ _id }) {
     return Subscriber.findById(_id).exec();

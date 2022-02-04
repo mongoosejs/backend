@@ -2,6 +2,7 @@
 
 const azureWrapper = require('../util/azureWrapper');
 const connect = require('../src/db');
+const checkSubscriberToken = require('../src/auth/checkSubscriberToken');
 const updateGithubOrganizationMembers = require('../src/actions/updateGithubOrganizationMembers');
 
 module.exports = azureWrapper(async function (context, req) {
@@ -15,6 +16,8 @@ module.exports = azureWrapper(async function (context, req) {
   });
 
   const params = Object.assign({}, req.body, { authorization: req.headers.authorization });
+
+  await checkSubscriberToken({ task, conn })(params);
 
   return updateGithubOrganizationMembers({ task, conn })(params);
 });
