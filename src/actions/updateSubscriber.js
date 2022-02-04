@@ -3,6 +3,8 @@
 const Archetype = require('archetype');
 const assert = require('assert');
 const mongoose = require('mongoose');
+const { omit } = require('ramda');
+const githubOAuth = require('../integrations/githubOAuth');
 
 const UpdateSubscriberParams = new Archetype({
   authorization: {
@@ -14,34 +16,46 @@ const UpdateSubscriberParams = new Archetype({
     $required: true
   },
   companyName: {
-    $type: 'string',
-    $required: true
+    $type: 'string'
   },
   description: {
-    $type: 'string',
-    $required: true
+    $type: 'string'
   },
   logo: {
-    $type: 'string',
-    $required: true
+    $type: 'string'
+  },
+  githubOrganization: {
+    $type: 'string'
   }
 }).compile('UpdateSubscriberParams');
 
 module.exports = ({ task, conn }) => async function updateSubscriber(params) {
   const { AccessToken, Subscriber } = conn.models;
 
-  const { authorization, _id, companyName, description, logo } = new UpdateSubscriberParams(params);
+  params = new UpdateSubscriberParams(params);
+  const { authorization, _id } = params;
 
-  const token = await AccessToken.findById({ _id: authorization });
+  const token = await task.sideEffect(async function findAccessToken({ _id }) {
+    return AccessToken.findById({ _id }).exec();
+  }, { _id: authorization });
   assert.ok(token, `Token ${authorization} not found`);
 
   assert.ok(token.subscriberId.toString() === _id.toString(),
     'Not authorized to update this subscriber');
 
-  const subscriber = await Subscriber.findById(_id);
-  subscriber.companyName = companyName;
-  subscriber.description = description;
-  subscriber.logo = logo;
+  const subscriber = await task.sideEffect(async function findSubscriber({ _id }) {
+    return Subscriber.findById(_id).exec();
+  }, { _id });
+  assert.ok(subscriber != null, `Subscriber ${_id} not found`);
+  subscriber.set(omit(['_id', 'authorization'], params));
+
+  if (params.githubOrganization != null) {
+    subscriber.githubOrganizationId = await task.sideEffect(
+      githubOAuth.getOrganizationId,
+      params.githubOrganization
+    );
+  }
+
   await subscriber.save();
 
   return { subscriber };
