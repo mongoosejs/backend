@@ -62,5 +62,14 @@ module.exports = {
     };
     const name = encodeURIComponent(organizationName);
     return axios.get(`https://api.github.com/orgs/${name}`, { headers }).then(res => res.data.id);
+  },
+  async getOrganizationMembers(organizationName) {
+    const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+    const headers = {
+      authorization: `bearer ${token}`,
+      accept: 'application/vnd.github.v3+json'
+    };
+    const name = encodeURIComponent(organizationName);
+    return axios.get(`https://api.github.com/orgs/${name}/public_members`, { headers }).then(res => res.data);
   }
 };

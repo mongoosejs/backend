@@ -47,13 +47,16 @@ module.exports = ({ task, conn }) => async function updateSubscriber(params) {
     return Subscriber.findById(_id).exec();
   }, { _id });
   assert.ok(subscriber != null, `Subscriber ${_id} not found`);
+
+  const priorOrg = params.githubOrganization;
   subscriber.set(omit(['_id', 'authorization'], params));
 
-  if (params.githubOrganization != null) {
+  if (params.githubOrganization != null && params.githubOrganization !== priorOrg) {
     subscriber.githubOrganizationId = await task.sideEffect(
       githubOAuth.getOrganizationId,
       params.githubOrganization
     );
+    subscriber.installationId = null;
   }
 
   await subscriber.save();
