@@ -3,6 +3,10 @@
 const mongoose = require('mongoose');
 
 module.exports = mongoose.Schema({
+  subscriberId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true
+  },
   logo: {
     type: String
   },

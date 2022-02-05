@@ -30,7 +30,7 @@ const UpdateSubscriberParams = new Archetype({
 }).compile('UpdateSubscriberParams');
 
 module.exports = ({ task, conn }) => async function updateSubscriber(params) {
-  const { AccessToken, Subscriber } = conn.models;
+  const { AccessToken, Subscriber, Job } = conn.models;
 
   params = new UpdateSubscriberParams(params);
   const { authorization, _id } = params;
@@ -60,6 +60,11 @@ module.exports = ({ task, conn }) => async function updateSubscriber(params) {
   }
 
   await subscriber.save();
+
+  await Job.updateMany({ subscriberId: subscriber._id }, {
+    logo: subscriber.logo,
+    company: subscriber.companyName
+  });
 
   return { subscriber };
 };

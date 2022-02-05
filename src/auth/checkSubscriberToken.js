@@ -2,6 +2,7 @@
 
 const Archetype = require('archetype');
 const assert = require('assert');
+const mongoose = require('mongoose');
 
 const CheckSubscriberTokenParams = new Archetype({
   authorization: {
