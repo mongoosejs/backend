@@ -3,6 +3,7 @@
 const Archetype = require('archetype');
 const assert = require('assert');
 const mongoose = require('mongoose');
+const {createMessage} = require('../integrations/slack');
 
 const JobParams = new Archetype({
   url: {
@@ -57,6 +58,6 @@ module.exports = ({ task, conn }) => async function findJobsBySponsor(params) {
     company: subscriber.companyName,
     subscriberId: subscriber._id
   })));
-
+  await createMessage(jobs);
   return { jobs };
 };
