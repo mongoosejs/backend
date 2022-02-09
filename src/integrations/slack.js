@@ -13,11 +13,11 @@ module.exports = {
     // Send to Slack
     let company = '';
     let jobTitle = '';
-    if (Array.isArray(jobs)) {
+    if (jobs.length > 1) {
         company = jobs[0].company;
-        jobTitle = jobs.map(entry => {
-            entry.title;
-        });
+        jobTitle = jobs.map(entry => 
+            entry.title
+        );
         await axios.post(url, {
             channel: '#pro-notifications',
             blocks: [
@@ -26,7 +26,7 @@ module.exports = {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: `*Job Updated!* \n\n ${company} has updated the following job`
+                  text: `*Jobs Updated!* \n\n ${company} has updated the following jobs`
                 }
               },
               {type: 'divider'},
@@ -34,14 +34,14 @@ module.exports = {
                 type: 'section',
                 text: {
                   type: 'mrkdwn',
-                  text: `*Job:* \n\n ${jobTitle.join(',')}`
+                  text: `*Jobs:* \n\n ${jobTitle.join(', ')}`
                 }
               }, 
             ]
           }, { headers: { authorization: `Bearer ${config.slackToken}` } });
     } else {
-        company = jobs.company;
-        jobTitle = jobs.title;
+        company = jobs[0].company;
+        jobTitle = jobs[0].title;
         await axios.post(url, {
             channel: '#pro-notifications',
             blocks: [
