@@ -7,6 +7,8 @@ const { createTokenAuth } = require('@octokit/auth-token');
 const config = require('../.config');
 const connect = require('../src/db');
 
+const ignoreUsers = new Set(config.ignoreUsers);
+
 module.exports = azureWrapper(async function webhookGitHubComment(context, req) {
   const conn = await connect();
   const Subscriber = conn.model('Subscriber');
@@ -30,6 +32,10 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
     const orgs = await axios.get(sender['organizations_url']).then(res => res.data);
     const orgNames = orgs.map(org => org.login);
     const orgIds = orgs.map(org => org.id);
+
+    if (ignoreUsers.has(sender.login)) {
+      return { ok: 1 };
+    }
 
     const subscriber = await Subscriber.findOne({
       $or: [
