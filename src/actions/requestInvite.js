@@ -1,6 +1,8 @@
 const axios = require('axios');
+const config = require('../../.config/development');
 
 async function requestInvite(email) {
+
     const url = 'https://slack.com/api/chat.postMessage';
     await axios.post(url, {
       channel: '#pro-notifications',
@@ -16,3 +18,5 @@ async function requestInvite(email) {
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
 }
+
+requestInvite('test@localhost.com');
