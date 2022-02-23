@@ -1,7 +1,7 @@
 const axios = require('axios');
 const config = require('../../.config/development');
 
-async function requestInvite(email) {
+module.exports = ({task, conn}) => async function requestInvite(email) {
 
     const url = 'https://slack.com/api/chat.postMessage';
     await axios.post(url, {
