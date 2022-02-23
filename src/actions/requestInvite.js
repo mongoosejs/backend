@@ -18,5 +18,3 @@ module.exports = ({task, conn}) => async function requestInvite(email) {
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
 }
-
-requestInvite('test@localhost.com');
