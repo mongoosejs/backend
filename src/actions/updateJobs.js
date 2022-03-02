@@ -61,47 +61,26 @@ module.exports = ({ task, conn }) => async function findJobsBySponsor(params) {
   let messageObj = {channel: '#pro-notifications', blocks: []};
   let company = '';
   let jobTitle = '';
-  if(jobs.length > 1) {
-    company = jobs[0].company;
-    jobTitle = jobs.map(entry => 
-        entry.title
-    );
-    messageObj.blocks.push({type: 'divider'},
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Jobs Updated!* \n\n ${company} has updated the following jobs`
-      }
-    },
-    {type: 'divider'},
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Jobs:* \n\n ${jobTitle.join(', ')}`
-      }
-    });
-  } else {
-    company = jobs[0].company;
-    jobTitle = jobs[0].title;
-    messageObj.blocks.push({type: 'divider'},
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Job Updated!* \n\n ${company} has updated the following job`
-      }
-    },
-    {type: 'divider'},
-    {
-      type: 'section',
-      text: {
-        type: 'mrkdwn',
-        text: `*Job:* \n\n ${jobTitle}`
-      }
-    })
-  }
+  company = jobs[0].company;
+  jobTitle = jobs.map(entry => 
+      entry.title
+  );
+  messageObj.blocks.push({type: 'divider'},
+  {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: `*Jobs Updated!* \n\n ${company} has updated the following jobs`
+    }
+  },
+  {type: 'divider'},
+  {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: `*Jobs:* \n\n ${jobTitle.join(', ')}`
+    }
+  });
 
   await slack.sendMessage(messageObj);
   return { jobs };
