@@ -3,6 +3,7 @@
 const Archetype = require('archetype');
 const assert = require('assert');
 const mongoose = require('mongoose');
+const slack = require('../integrations/slack');
 
 const JobParams = new Archetype({
   url: {
@@ -57,6 +58,30 @@ module.exports = ({ task, conn }) => async function findJobsBySponsor(params) {
     company: subscriber.companyName,
     subscriberId: subscriber._id
   })));
+  let messageObj = {channel: '#pro-notifications', blocks: []};
+  let company = '';
+  let jobTitle = '';
+  company = jobs[0].company;
+  jobTitle = jobs.map(entry => 
+      entry.title
+  );
+  messageObj.blocks.push({type: 'divider'},
+  {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: `*Jobs Updated!* \n\n ${company} has updated the following jobs`
+    }
+  },
+  {type: 'divider'},
+  {
+    type: 'section',
+    text: {
+      type: 'mrkdwn',
+      text: `*Jobs:* \n\n ${jobTitle.join(', ')}`
+    }
+  });
 
+  await slack.sendMessage(messageObj);
   return { jobs };
 };
