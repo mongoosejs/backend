@@ -70,7 +70,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: ${issue.title}`
+            text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: *${issue.title}*, Link: ${issue.html_url}`
           }
         },
         {type: 'divider'},

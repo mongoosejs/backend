@@ -34,7 +34,7 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*COMMENT CREATED ON ISSUE!* \n\n ${comment.user.login} has posted a comment on issue: *${issue.title}*, ${issue.url}`
+            text: `*COMMENT CREATED ON ISSUE!* \n\n ${comment.user.login} has posted a comment on issue: *${issue.title}*, ${issue.html_url}`
           }
         },
         {type: 'divider'},
