@@ -83,7 +83,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
         }, 
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
-  } else if (action === 'created') {
+  } else if (action === 'created' && comment != null) {
 
     if (ignoreUsers.has(comment.user.login)) {
       return { ok: 1 };

@@ -1,19 +1,14 @@
 
-const axios = require('axios');
-const config = require('../../.config')
+
+const {sendMessage} = require('../integrations/slack');
 module.exports = ({task, conn}) => async function handleGithubComment(params) {
     const {Subscriber} = conn.models;
 
     const {comment, issue} = params;
-    const orgs = await axios.get(comment.user['organizations_url']).then(res => res.data);
-    const orgNames = orgs.map(org => org.login);
-    const orgIds = orgs.map(org => org.id);
     const subscriber = await Subscriber.findOne({
       $or: [
         { githubUsername: comment.user.login },
         { githubUserId: comment.user.id.$numberInt },
-        { githubOrganization: { $in: orgNames } },
-        { githubOrganizationId: { $in: orgIds } },
         { 'githubOrganizationMembers.login': comment.user.login },
         { 'githubOrganizationMembers.id': comment.user.id.$numberInt }
       ]
@@ -26,7 +21,7 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
 
     // Send to Slack
     const url = 'https://slack.com/api/chat.postMessage';
-    await axios.post(url, {
+    const details = {
       channel: '#pro-notifications',
       blocks: [
         {type: 'divider'},
@@ -46,5 +41,6 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
           }
         }, 
       ]
-    }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+    }
+    await sendMessage(details);
 }
