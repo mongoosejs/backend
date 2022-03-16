@@ -1,6 +1,7 @@
 
 
-const {sendMessage} = require('../integrations/slack');
+const slack = require('../integrations/slack');
+
 module.exports = ({task, conn}) => async function handleGithubComment(params) {
     const {Subscriber} = conn.models;
 
@@ -13,14 +14,13 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
         { 'githubOrganizationMembers.id': comment.user.id.$numberInt }
       ]
     });
-
+    // console.log(params);
     if (subscriber == null) {
       return { ok: 1 };
     }
     await task.log('subscriber commented on issue');
 
     // Send to Slack
-    const url = 'https://slack.com/api/chat.postMessage';
     const details = {
       channel: '#pro-notifications',
       blocks: [
@@ -42,5 +42,5 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
         }, 
       ]
     }
-    await sendMessage(details);
+    return await slack.sendMessage(details);
 }

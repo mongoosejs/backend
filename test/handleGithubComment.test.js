@@ -2,24 +2,38 @@
 
 const TaskSchema = require('../src/db/task');
 const assert = require('assert');
+const connect = require('../src/db');
 const sinon = require('sinon');
 const slack = require('../src/integrations/slack');
 const handleGithubComment = require('../src/actions/handleGithubComment');
 
 describe('handleGithubComment', function() {
+  let conn;
+  let Subscriber;
   let Task;
   let task;
-  before(() => {
+  before(async function() {
+    conn = await connect();
     Task = conn.model('Task', TaskSchema);
+    Subscriber = conn.model('Subscriber');
   });
 
   beforeEach(async function() {
+    await conn.dropDatabase();
     task = await Task.create({});
+
   });
 
   afterEach(() => sinon.restore());
 
   it('successfully sends a message', async function() {
+
+    await Subscriber.create({
+      email: 'val@karpov.io',
+      githubUsername: 'vkarpov15',
+      githubUserId: '1234',
+      githubOrganization: 'mastering-js'
+    });
 
     const params = {
         "action": "created",
@@ -173,11 +187,11 @@ describe('handleGithubComment', function() {
         },
       };
 
-      const stub = sinon.stub(slack, 'sendMessage').callsFake(() => Promise.resolve('Message Sent'));
-      console.log('yo', slack.sendMessage(params))
+      const stub = sinon.stub(slack, 'sendMessage').callsFake(() => Promise.resolve('Message Sent!'));
 
-      const res = await handleGithubComment({task, conn})(params);
-      console.log('the res', res)
+      await handleGithubComment({task, conn})(params);
+      assert(stub.callCount);
+      assert(stub.returns('Message Sent!'))
 
   });
 });
