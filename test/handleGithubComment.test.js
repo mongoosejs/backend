@@ -44,19 +44,13 @@ describe('handleGithubComment', function() {
           "comments_url": "https://api.github.com/repos/Automattic/mongoose/issues/11038/comments",
           "events_url": "https://api.github.com/repos/Automattic/mongoose/issues/11038/events",
           "html_url": "https://github.com/Automattic/mongoose/issues/11038",
-          "id": {
-            "$numberInt": "1069759720"
-          },
+          "id": "1069759720",
           "node_id": "I_kwDOAAkfd84_wzzo",
-          "number": {
-            "$numberInt": "11038"
-          },
+          "number": "11038",
           "title": "[6.x regression / behavior change?] findOneAndUpdate no longer sets undefined fields as null",
           "user": {
             "login": "ronjouch",
-            "id": {
-              "$numberInt": "522085"
-            },
+            "id": "522085",
             "node_id": "MDQ6VXNlcjUyMjA4NQ==",
             "avatar_url": "https://avatars.githubusercontent.com/u/522085?v=4",
             "gravatar_id": "",
@@ -76,9 +70,7 @@ describe('handleGithubComment', function() {
           },
           "labels": [
             {
-              "id": {
-                "$numberInt": "28988582"
-              },
+              "id": "28988582",
               "node_id": "MDU6TGFiZWwyODk4ODU4Mg==",
               "url": "https://api.github.com/repos/Automattic/mongoose/labels/confirmed-bug",
               "name": "confirmed-bug",
@@ -95,20 +87,14 @@ describe('handleGithubComment', function() {
             "url": "https://api.github.com/repos/Automattic/mongoose/milestones/476",
             "html_url": "https://github.com/Automattic/mongoose/milestone/476",
             "labels_url": "https://api.github.com/repos/Automattic/mongoose/milestones/476/labels",
-            "id": {
-              "$numberInt": "7282494"
-            },
+            "id": "7282494",
             "node_id": "MI_kwDOAAkfd84Abx8-",
-            "number": {
-              "$numberInt": "476"
-            },
+            "number": "476",
             "title": "6.1.3",
             "description": "",
             "creator": {
               "login": "vkarpov15",
-              "id": {
-                "$numberInt": "1620265"
-              },
+              "id": "1620265",
               "node_id": "MDQ6VXNlcjE2MjAyNjU=",
               "avatar_url": "https://avatars.githubusercontent.com/u/1620265?v=4",
               "gravatar_id": "",
@@ -126,21 +112,15 @@ describe('handleGithubComment', function() {
               "type": "User",
               "site_admin": false
             },
-            "open_issues": {
-              "$numberInt": "12"
-            },
-            "closed_issues": {
-              "$numberInt": "2"
-            },
+            "open_issues": "12",
+            "closed_issues": "2",
             "state": "open",
             "created_at": "2021-10-23T23:28:00Z",
             "updated_at": "2021-12-15T15:13:42Z",
             "due_on": null,
             "closed_at": null
           },
-          "comments": {
-            "$numberInt": "1"
-          },
+          "comments": "1",
           "created_at": "2021-12-02T16:40:44Z",
           "updated_at": "2021-12-15T15:13:42Z",
           "closed_at": "2021-12-15T15:13:42Z",
@@ -154,15 +134,11 @@ describe('handleGithubComment', function() {
           "url": "https://api.github.com/repos/Automattic/mongoose/issues/comments/994888151",
           "html_url": "https://github.com/Automattic/mongoose/issues/11038#issuecomment-994888151",
           "issue_url": "https://api.github.com/repos/Automattic/mongoose/issues/11038",
-          "id": {
-            "$numberInt": "994888151"
-          },
+          "id": "994888151",
           "node_id": "IC_kwDOAAkfd847TMnX",
           "user": {
             "login": "vkarpov15",
-            "id": {
-              "$numberInt": "1620265"
-            },
+            "id": "1620265",
             "node_id": "MDQ6VXNlcjE2MjAyNjU=",
             "avatar_url": "https://avatars.githubusercontent.com/u/1620265?v=4",
             "gravatar_id": "",
@@ -190,8 +166,8 @@ describe('handleGithubComment', function() {
       const stub = sinon.stub(slack, 'sendMessage').callsFake(() => Promise.resolve('Message Sent!'));
 
       await handleGithubComment({task, conn})(params);
-      assert(stub.callCount);
-      assert(stub.returns('Message Sent!'))
-
+      assert.equal(stub.callCount, 1);
+      assert.equal(stub.getCall(0).args[0].channel, '#pro-notifications')
+      assert(stub.getCall(0).args[0].blocks[1].text.text.includes('vkarpov15'))
   });
 });

@@ -9,9 +9,9 @@ module.exports = ({task, conn}) => async function handleGithubComment(params) {
     const subscriber = await Subscriber.findOne({
       $or: [
         { githubUsername: comment.user.login },
-        { githubUserId: comment.user.id.$numberInt },
+        { githubUserId: comment.user.id },
         { 'githubOrganizationMembers.login': comment.user.login },
-        { 'githubOrganizationMembers.id': comment.user.id.$numberInt }
+        { 'githubOrganizationMembers.id': comment.user.id }
       ]
     });
     // console.log(params);
