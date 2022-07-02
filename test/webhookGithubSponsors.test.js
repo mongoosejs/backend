@@ -70,4 +70,38 @@ describe('webhookGithubSponsors', function() {
     assert.ok(!fromDb.githubOrganization);
     assert.ok(!fromDb.githubOrganizationId);
   });
+
+  it('handles incorrect tier names if description still correct', async function() {
+    const { subscriber } = await api_webhookGithubSponsors(null, {
+      body: {
+        "action": "created",
+        "sponsorship": {
+          "sponsor": {
+            "login": "user2",
+            "id": 2,
+            "type": "User"
+          },
+          "privacy_level": "public",
+          "tier": {
+            "name": "$199 a Month",
+            "description": "**Mongoose Pro Subscriber**\r\n\r\nThanks for your support!",
+            "is_one_time": false,
+            "is_custom_amount": false
+          }
+        },
+        "sender": {
+          "login": "user2",
+          "id": 4
+        }
+      }
+    });
+
+    const conn = await connect();
+    const Subscriber = conn.model('Subscriber');
+    const fromDb = await Subscriber.findById(subscriber);
+    assert.equal(fromDb.githubUserId, 4);
+    assert.equal(fromDb.githubUsername, 'user2');
+    assert.ok(!fromDb.githubOrganization);
+    assert.ok(!fromDb.githubOrganizationId);
+  });
 });

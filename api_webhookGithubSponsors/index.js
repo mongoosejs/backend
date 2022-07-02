@@ -30,6 +30,9 @@ const GithubSponsorsParams = new Archetype({
       name: {
         $type: 'string'
       },
+      description: {
+        $type: 'string'
+      },
       is_one_time: {
         $type: 'boolean'
       },
@@ -67,7 +70,9 @@ async function webhookGithubSponsors(context, req) {
   let subscriber;
   switch (action) {
     case 'created':
-      if (sponsorship.tier.name !== 'Mongoose Pro Subscriber') {
+      const name = sponsorship?.tier?.name || '';
+      const description = sponsorship?.tier?.description || '';
+      if (!name.includes('Mongoose Pro') && !description.includes('Mongoose Pro')) {
         break;
       }
       if (sponsorship.tier.is_one_time) {
