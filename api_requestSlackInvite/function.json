@@ -1,0 +1,21 @@
+{
+    "bindings": [
+      {
+        "type": "httpTrigger",
+        "direction": "in",
+        "name": "req",
+        "authLevel": "anonymous",
+        "methods": [
+          "get",
+          "post",
+          "options"
+        ],
+        "route": "requestSlackInvite"
+      },
+      {
+        "type": "http",
+        "direction": "out",
+        "name": "res"
+      }
+    ]
+  }
