@@ -19,7 +19,7 @@
   "scripts": {
     "seed": "env NODE_ENV=development node ./seed",
     "start": "env NODE_ENV=development func start",
-    "deploy": "rm -rf ./node_modules && npm install --production && func azure functionapp publish mongoosejs",
+    "deploy": "(test -e ./.config/production.js || exit -1) && rm -rf ./node_modules && npm install --production && func azure functionapp publish mongoosejs",
     "test": "env NODE_ENV=test mocha test/*.test.js",
     "lint": "eslint ."
   }
