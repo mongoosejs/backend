@@ -8,7 +8,8 @@ let conn = null;
 const contentSchema = new mongoose.Schema({
   title: { type: String, required: true },
   body: { type: String, required: true },
-  url: { type: String, required: true }
+  url: { type: String, required: true },
+  version: { type: String }
 });
 contentSchema.index({ title: 'text', body: 'text' });
 
@@ -22,8 +23,13 @@ module.exports = async function search(context, req) {
   Content = conn.model('Content', contentSchema, 'Content');
 
   const $search = req.query.search.toString();
+  const version = req.query.version;
+  const filter = { $text: { $search } };
+  if (version) {
+    filter.version = version;
+  }
   let results = await Content.
-    find({ $text: { $search } }, { score: { $meta: 'textScore' } }).
+    find(filter, { score: { $meta: 'textScore' } }).
     sort({ score: { $meta: 'textScore' } }).
     limit(10);
 
