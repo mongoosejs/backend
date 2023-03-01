@@ -9,7 +9,7 @@
     "archetype": "0.13.0",
     "axios": "0.21.4",
     "cheerio": "1.0.0-rc.2",
-    "mongoose": "7.0.0-rc0",
+    "mongoose": "7.0.0",
     "ramda": "0.28.0"
   },
   "devDependencies": {
