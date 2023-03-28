@@ -11,7 +11,6 @@ const contentSchema = new mongoose.Schema({
   url: { type: String, required: true },
   version: { type: String }
 });
-contentSchema.index({ title: 'text', body: 'text' });
 
 module.exports = async function search(context, req) {
   let Content;
@@ -22,16 +21,30 @@ module.exports = async function search(context, req) {
 
   Content = conn.model('Content', contentSchema, 'Content');
 
-  const $search = req.query.search.toString();
+  const query = req.query.search.toString();
   const version = req.query.version;
-  const filter = { $text: { $search } };
-  if (version) {
-    filter.version = version;
-  }
-  let results = await Content.
-    find(filter, { score: { $meta: 'textScore' } }).
-    sort({ score: { $meta: 'textScore' } }).
-    limit(10);
+  let results = await Content.aggregate([
+    {
+      $search: {
+        index: 'mongoose-content',
+        text: {
+          query,
+          path: { wildcard: '*' },
+          fuzzy: {}
+        }
+      }
+    },
+    { $match: { version } },
+    {
+      $addFields: {
+        score: {
+          $meta: 'searchScore'
+        }
+      }
+    },
+    { $sort: { score: -1 } },
+    { $limit: 10 }
+  ]);
 
   results = results.map(doc => {
     const $ = cheerio.load(doc.body);
