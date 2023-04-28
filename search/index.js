@@ -9,7 +9,8 @@ const contentSchema = new mongoose.Schema({
   title: { type: String, required: true },
   body: { type: String, required: true },
   url: { type: String, required: true },
-  version: { type: String }
+  version: { type: String },
+  versionNumber: { type: Number }
 });
 
 module.exports = async function search(context, req) {
@@ -22,27 +23,24 @@ module.exports = async function search(context, req) {
   Content = conn.model('Content', contentSchema, 'Content');
 
   const query = req.query.search.toString();
-  const version = req.query.version;
+  const version = req.query.version ? +req.query.version.replace(/\.x$/, '') : null;
   let results = await Content.aggregate([
     {
       $search: {
         index: 'mongoose-content',
-        text: {
-          query,
-          path: { wildcard: '*' },
-          fuzzy: {}
+        compound: {
+          must: [
+            ...(version ? [{
+              equals: {
+                path: 'versionNumber',
+                value: version
+              }
+            }] : []),
+            { text: { query, path: { wildcard: '*' }, fuzzy: {} } }
+          ]
         }
       }
     },
-    { $match: { version } },
-    {
-      $addFields: {
-        score: {
-          $meta: 'searchScore'
-        }
-      }
-    },
-    { $sort: { score: -1 } },
     { $limit: 10 }
   ]);
 
