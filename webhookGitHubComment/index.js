@@ -6,6 +6,7 @@ const createReleaseFromChangelog = require('../src/actions/createReleaseFromChan
 const { createTokenAuth } = require('@octokit/auth-token');
 const config = require('../.config');
 const connect = require('../src/db');
+const handleGithubComment = require('../src/actions/handleGithubComment');
 
 const ignoreUsers = new Set(config.ignoreUsers);
 
@@ -22,7 +23,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
 
   const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
 
-  const { action, issue, sender, ref, ref_type } = req.body;
+  const { action, issue, sender, ref, ref_type, comment } = req.body;
 
   await task.log(`Action: ${action}`);
 
@@ -69,7 +70,7 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
           type: 'section',
           text: {
             type: 'mrkdwn',
-            text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: ${issue.title}`
+            text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: *${issue.title}*, Link: ${issue.html_url}`
           }
         },
         {type: 'divider'},
@@ -82,6 +83,16 @@ module.exports = azureWrapper(async function webhookGitHubComment(context, req) 
         }, 
       ]
     }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+  } else if (action === 'created' && comment != null) {
+
+    if (ignoreUsers.has(comment.user.login)) {
+      return { ok: 1 };
+    }
+
+    await task.log('comment on issue');
+
+    await handleGithubComment({task, conn})(req.body)
+
   } else if (ref != null && ref_type === 'tag') {
     // Assume tag was created, so create a release
     await createReleaseFromChangelog(task)(ref);
