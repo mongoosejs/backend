@@ -69,3 +69,6 @@ package-lock.json
 bin
 
 data
+
+# Local Netlify folder
+.netlify

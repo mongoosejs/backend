@@ -3,19 +3,20 @@
 const axios = require('axios');
 const createReleaseFromChangelog = require('../../src/actions/createReleaseFromChangelog');
 const { createTokenAuth } = require('@octokit/auth-token');
-const config = require('../../.config');
 const connect = require('../../src/db');
 const extrovert = require('extrovert');
 
-const ignoreUsers = new Set(config.ignoreUsers);
+const ignoreUsers = new Set((process.env.IGNORE_GITHUB_USERS || '').split(','));
+const githubAccessTokenForMongoose = process.env.GITHUB_ACCESS_TOKEN_FOR_MONGOOSE;
+const slackToken = process.env.SLACK_TOKEN;
 
 module.exports = extrovert.toNetlifyFunction(async function webhookGitHubComment(params) {
   const conn = await connect();
   const Subscriber = conn.model('Subscriber');
 
-  const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+  const { token } = await createTokenAuth(githubAccessTokenForMongoose)();
 
-  const { action, issue, sender, ref, ref_type } = req.body;
+  const { action, issue, sender, ref, ref_type } = params;
 
   if (action === 'opened' && issue != null) {
     // Opened new issue
@@ -71,7 +72,7 @@ module.exports = extrovert.toNetlifyFunction(async function webhookGitHubComment
           }
         }, 
       ]
-    }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+    }, { headers: { authorization: `Bearer ${slackToken}` } });
   } else if (ref != null && ref_type === 'tag') {
     // Assume tag was created, so create a release
     await createReleaseFromChangelog(ref);
