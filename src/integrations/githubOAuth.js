@@ -47,8 +47,9 @@ module.exports = {
     return axios.post(`https://github.com/login/oauth/access_token`, body, opts).
       then(res => res.data);
   },
-  getChangelog() {
-    const url = host + '/repos/Automattic/mongoose/contents/CHANGELOG.md';
+  getChangelog(params) {
+    const branch = params && params.branch || 'master';
+    const url = host + '/repos/Automattic/mongoose/contents/CHANGELOG.md?ref=' + branch;
     const headers = {
       accept: 'application/vnd.github.v3.raw'
     };

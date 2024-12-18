@@ -6,7 +6,18 @@ module.exports = task => async function createReleaseFromChangelog(ref) {
   if (ref == null) {
     return;
   }
-  const changelog = await task.sideEffect(githubOAuth.getChangelog, {});
+  const branch = (() => {
+    if (ref.startsWith('6.')) {
+      return '6.x';
+    }
+    if (ref.startsWith('7.')) {
+      return '7.x';
+    }
+    return 'master';
+  })();
+  const changelog = await task.sideEffect(githubOAuth.getChangelog, {
+    branch
+  });
   const lines = changelog.split('\n');
   let changelogLines = null;
   for (let i = 0; i < lines.length; ++i) {

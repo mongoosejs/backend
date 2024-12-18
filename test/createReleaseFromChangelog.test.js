@@ -31,5 +31,7 @@ describe('createReleaseFromChangelog', function() {
     const [tagAndName, body] = githubOAuth.createRelease.getCall(0).args;
     assert.equal(tagAndName, '6.1.1');
     assert.equal(body, changelog);
+    const [{ branch }] = githubOAuth.getChangelog.getCall(0).args;
+    assert.equal(branch, '6.x');
   });
 });
