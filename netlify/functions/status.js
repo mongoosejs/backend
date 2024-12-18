@@ -1,8 +1,8 @@
 'use strict'
 
-const azureWrapper = require('../util/azureWrapper');
+const extrovert = require('extrovert');
 const pkg = require('../package.json');
 
-module.exports = azureWrapper(async function status() {
+module.exports = extrovert.toNetlifyFunction(async function status() {
   return { ok: 1, version: pkg.version, nodeVersion: process.version };
 });
