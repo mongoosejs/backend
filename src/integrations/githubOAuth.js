@@ -1,10 +1,11 @@
 'use strict';
 
 const axios = require('axios');
-const config = require('../../.config');
 const { createTokenAuth } = require('@octokit/auth-token');
 
 const host = 'https://api.github.com';
+
+const githubAccessTokenForMongoose = process.env.GITHUB_ACCESS_TOKEN_FOR_MONGOOSE;
 
 module.exports = {
   async createRelease(tagAndName, body) {
@@ -14,7 +15,7 @@ module.exports = {
       name: tagAndName,
       body: body,
     };
-    const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+    const { token } = await createTokenAuth(githubAccessTokenForMongoose)();
     const headers = {
       authorization: `bearer ${token}`,
       accept: 'application/vnd.github.v3+json'
@@ -37,7 +38,7 @@ module.exports = {
     };
     return axios.get('https://api.github.com/user', { headers }).then(res => res.data);
   },
-  getAccessToken(code) {
+  /*getAccessToken(code) {
     const body = {
       client_id: config.githubOAuthClientId,
       client_secret: config.githubOAuthClientSecret,
@@ -46,7 +47,7 @@ module.exports = {
     const opts = { headers: { accept: 'application/json' } };
     return axios.post(`https://github.com/login/oauth/access_token`, body, opts).
       then(res => res.data);
-  },
+  },*/
   getChangelog(params) {
     const branch = params && params.branch || 'master';
     const url = host + '/repos/Automattic/mongoose/contents/CHANGELOG.md?ref=' + branch;
@@ -56,7 +57,7 @@ module.exports = {
     return axios.get(url, { headers }).then((res) => res.data);
   },
   async getOrganizationId(organizationName) {
-    const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+    const { token } = await createTokenAuth(githubAccessTokenForMongoose)();
     const headers = {
       authorization: `bearer ${token}`,
       accept: 'application/vnd.github.v3+json'
@@ -65,7 +66,7 @@ module.exports = {
     return axios.get(`https://api.github.com/orgs/${name}`, { headers }).then(res => res.data.id);
   },
   async getOrganizationMembers(organizationName) {
-    const { token } = await createTokenAuth(config.githubAccessTokenForMongoose)();
+    const { token } = await createTokenAuth(githubAccessTokenForMongoose)();
     const headers = {
       authorization: `bearer ${token}`,
       accept: 'application/vnd.github.v3+json'
