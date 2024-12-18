@@ -1,5 +1,6 @@
 'use strict';
 
+const Archetype = require('archetype');
 const axios = require('axios');
 const createReleaseFromChangelog = require('../../src/actions/createReleaseFromChangelog');
 const { createTokenAuth } = require('@octokit/auth-token');
@@ -9,6 +10,25 @@ const extrovert = require('extrovert');
 const ignoreUsers = new Set((process.env.IGNORE_GITHUB_USERS || '').split(','));
 const githubAccessTokenForMongoose = process.env.GITHUB_ACCESS_TOKEN_FOR_MONGOOSE;
 const slackToken = process.env.SLACK_TOKEN;
+
+const WebhookGitHubCommentParams = new Archetype({
+  action: {
+    $type: 'string',
+    $required: true
+  },
+  issue: {
+    $type: Archetype.Any
+  },
+  sender: {
+    $type: Archetype.Any
+  },
+  ref: {
+    $type: 'string'
+  },
+  ref_type: {
+    $type: 'string'
+  }
+}).compile('WebhookGitHubCommentParams');
 
 module.exports = extrovert.toNetlifyFunction(async function webhookGitHubComment(params) {
   const conn = await connect();
