@@ -24,11 +24,13 @@ const SearchParams = new Archetype({
   }
 }).compile('SearchParams');
 
+const uri = process.env.MONGODB_CONNECTION_STRING;
+
 module.exports = extrovert.toNetlifyFunction(async function search(params) {
   params = new SearchParams(params);
   let Content;
   if (conn == null) {
-    conn = mongoose.createConnection(config.uri);
+    conn = mongoose.createConnection(uri);
     await conn.asPromise();
   }
 
