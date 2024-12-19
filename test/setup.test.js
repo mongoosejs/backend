@@ -1,5 +1,7 @@
 'use strict';
 
+require('dotenv').config({ path: './.env.test' });
+
 const connect = require('../src/db');
 
 global.conn = null;

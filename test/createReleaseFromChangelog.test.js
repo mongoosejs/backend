@@ -13,20 +13,10 @@ const changelog = `
 `.trim();
 
 describe('createReleaseFromChangelog', function() {
-  let Task;
-  let task;
-  before(() => {
-    Task = conn.model('Task', TaskSchema);
-  });
-
-  beforeEach(async function() {
-    task = await Task.create({});
-  });
-
   it('creates a draft release', async function() {
     sinon.stub(githubOAuth, 'getChangelog').callsFake(() => Promise.resolve(changelog));
     sinon.stub(githubOAuth, 'createRelease').callsFake(() => Promise.resolve());
-    await createReleaseFromChangelog(task)('6.1.1');
+    await createReleaseFromChangelog('6.1.1');
 
     const [tagAndName, body] = githubOAuth.createRelease.getCall(0).args;
     assert.equal(tagAndName, '6.1.1');
