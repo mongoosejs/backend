@@ -65,4 +65,4 @@ module.exports = extrovert.toNetlifyFunction(async function search(params) {
   });
 
   return { results };
-}
+});
