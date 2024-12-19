@@ -1,7 +1,8 @@
 'use strict';
 
 const axios = require('axios');
-const config = require('../../.config/development');
+
+const slackToken = process.env.SLACK_TOKEN;
 
 const url = 'https://slack.com/api/chat.postMessage';
 const emailRegexp = /^[a-zA-Z0-9+._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+$/;
@@ -26,7 +27,7 @@ module.exports = () => async function requestInvite(email) {
         }
       },
     ]
-  }, { headers: { authorization: `Bearer ${config.slackToken}` } });
+  }, { headers: { authorization: `Bearer ${slackToken}` } });
 
   return { success: true };
 }

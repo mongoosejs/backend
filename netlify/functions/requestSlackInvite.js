@@ -2,7 +2,7 @@
 
 const Archetype = require('archetype');
 const extrovert = require('extrovert');
-const requestInvite = require('../src/actions/requestInvite');
+const requestInvite = require('../../src/actions/requestInvite');
 
 const RequestSlackInviteParams = new Archetype({
   email: {
