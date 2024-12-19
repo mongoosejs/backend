@@ -22,7 +22,7 @@ const SearchParams = new Archetype({
     $type: 'string',
     $required: true
   }
-})
+}).compile('SearchParams');
 
 module.exports = extrovert.toNetlifyFunction(async function search(params) {
   params = new SearchParams(params);
