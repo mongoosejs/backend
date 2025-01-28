@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>Mongoose</title>
+
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="msapplication-TileColor" />
+    <meta name="theme-color" content="#ffffff"/>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans"/>
+    <link rel="icon" href="https://mongoosejs.com/docs/images/mongoose5_62x30_transparent.png" type="image/svg+xml">
+  </head>
+
+  <body>
+    <h1>
+      Redirecting...
+    </h1>
+
+    <script>
+      (async function() {
+        const params = new URLSearchParams(window.location.search);
+        if (!params.has('code')) {
+          throw new Error('No oauth code');
+        }
+
+        const code = params.get('code');
+        const state = params.get('state');
+        window.location.href = state + '?code=' + code;
+      })();
+    </script>
+  </body>
+</html>
