@@ -1,25 +1,30 @@
 'use strict';
 
 const Archetype = require('archetype');
-const assert = require('assert');
 const connect = require('../../src/db');
 const extrovert = require('extrovert');
 const githubOAuth = require('../../src/integrations/githubOAuth');
-
-const userInfoURL = 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json';
+const mongoose = require('mongoose');
 
 const GithubOAuthParams = new Archetype({
   code: {
-    $type: 'string'
+    $type: 'string',
+    $required: true
+  },
+  workspaceId: {
+    $type: mongoose.Types.ObjectId
   }
 }).compile('GithubOAuthParams');
 
 module.exports = extrovert.toNetlifyFunction(async function github(params) {
   params = new GithubOAuthParams(params);
   const code = params.code;
+  const workspaceId = params.workspaceId;
 
   const db = await connect();
-  const { AccessToken, User } = db.models;
+  const { AccessToken, User, Workspace } = db.models;
+
+  const workspace = await Workspace.findById(workspaceId).orFail();
 
   const { access_token: token } = await githubOAuth.getAccessToken(code);
   const userData = await githubOAuth.getUser(token);
@@ -49,5 +54,7 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
     userId: user._id
   });
 
-  return { user, accessToken };
+  const roles = workspace.members.find(member => member.userId.toString() === user._id.toString())?.roles ?? null;
+
+  return { user, accessToken, roles };
 });
