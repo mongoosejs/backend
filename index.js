@@ -3,8 +3,10 @@
 require('dotenv').config();
 
 const cors = require('cors');
+const connect = require('./src/db');
 const express = require('express');
 const fs = require('fs');
+const studio = require('@mongoosejs/studio/express');
 
 const app = express();
 
@@ -63,5 +65,10 @@ app.use(
   )
 );
 
-app.listen(8888);
-console.log('Listening on port 8888');
+(async function () {
+  const db = await connect();
+  app.use('/studio', studio('/studio/api', db));
+
+  app.listen(8888);
+  console.log('Listening on port 8888');
+})();

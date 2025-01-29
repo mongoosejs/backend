@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const accessTokenSchema = new mongoose.Schema({
   _id: {
     type: String,
-    default: () => crypto.randomBytes(36).toString('hex')
+    default: () => crypto.randomBytes(48).toString('hex')
   },
   userId: { type: mongoose.ObjectId, required: true, ref: 'User' },
   expiresAt: {

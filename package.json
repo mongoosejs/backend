@@ -16,6 +16,7 @@
   },
   "devDependencies": {
     "@mongoosejs/migrations": "0.2.5",
+    "@mongoosejs/studio": "0.0.50",
     "cors": "2.8.5",
     "dotenv": "16.4.7",
     "express": "4.x",
@@ -24,7 +25,7 @@
   },
   "scripts": {
     "seed": "env NODE_ENV=development node ./seed",
-    "start": "env NODE_ENV=local node .",
+    "start": "node .",
     "test": "env NODE_ENV=test mocha test/*.test.js",
     "lint": "eslint ."
   }
