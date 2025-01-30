@@ -9,7 +9,7 @@
     "archetype": "0.13.0",
     "axios": "0.21.4",
     "cheerio": "1.0.0",
-    "extrovert": "0.0.25",
+    "extrovert": "0.0.26",
     "googleapis": "100.0.0",
     "mongoose": "8.x",
     "ramda": "0.28.0"
