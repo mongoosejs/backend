@@ -11,7 +11,8 @@
     "cheerio": "1.0.0",
     "extrovert": "0.0.26",
     "mongoose": "8.x",
-    "ramda": "0.28.0"
+    "ramda": "0.28.0",
+    "time-commando": "1.0.1"
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",
@@ -27,7 +28,7 @@
   "scripts": {
     "seed": "env NODE_ENV=development node ./seed",
     "start": "node .",
-    "test": "env NODE_ENV=test mocha test/*.test.js",
+    "test": "env NODE_ENV=test mocha -r ./config test/*.test.js",
     "lint": "eslint ."
   }
 }
