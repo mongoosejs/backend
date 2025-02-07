@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const extrovert = require('extrovert');
 const pkg = require('../../package.json');

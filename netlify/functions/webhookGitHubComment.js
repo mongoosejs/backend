@@ -75,7 +75,7 @@ module.exports = extrovert.toNetlifyFunction(async function webhookGitHubComment
     await axios.post(url, {
       channel: '#pro-notifications',
       blocks: [
-        {type: 'divider'},
+        { type: 'divider' },
         {
           type: 'section',
           text: {
@@ -83,14 +83,14 @@ module.exports = extrovert.toNetlifyFunction(async function webhookGitHubComment
             text: `*NEW ISSUE CREATED!* \n\n ${issue.user.login} has posted an issue titled: ${issue.title}`
           }
         },
-        {type: 'divider'},
+        { type: 'divider' },
         {
           type: 'section',
           text: {
             type: 'mrkdwn',
             text: `*DESCRIPTION* \n\n ${issue.body}`
           }
-        }, 
+        } 
       ]
     }, { headers: { authorization: `Bearer ${slackToken}` } });
   } else if (ref != null && ref_type === 'tag') {

@@ -14,10 +14,12 @@
     "ramda": "0.28.0"
   },
   "devDependencies": {
+    "@masteringjs/eslint-config": "0.1.1",
     "@mongoosejs/migrations": "0.2.5",
     "@mongoosejs/studio": "0.0.50",
     "cors": "2.8.5",
     "dotenv": "16.4.7",
+    "eslint": "9.x",
     "express": "4.x",
     "mocha": "9.1.3",
     "sinon": "12.0.1"

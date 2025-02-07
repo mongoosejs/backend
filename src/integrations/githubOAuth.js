@@ -15,7 +15,7 @@ module.exports = {
     const data = {
       tag_name: tagAndName,
       name: tagAndName,
-      body: body,
+      body: body
     };
     const { token } = await createTokenAuth(githubAccessTokenForMongoose)();
     const headers = {
@@ -59,7 +59,7 @@ module.exports = {
       code
     };
     const opts = { headers: { accept: 'application/json' } };
-    return axios.post(`https://github.com/login/oauth/access_token`, body, opts).
+    return axios.post('https://github.com/login/oauth/access_token', body, opts).
       then(res => res.data);
   },
   getChangelog(params) {

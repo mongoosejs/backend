@@ -18,16 +18,16 @@ module.exports = () => async function requestInvite(email) {
   await axios.post(url, {
     channel: '#pro-notifications',
     blocks: [
-      {type: 'divider'},
+      { type: 'divider' },
       {
         type: 'section',
         text: {
           type: 'mrkdwn',
           text: `${email} is requesting access to the mongoosejs workspace`
         }
-      },
+      }
     ]
   }, { headers: { authorization: `Bearer ${slackToken}` } });
 
   return { success: true };
-}
+};

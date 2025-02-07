@@ -26,6 +26,6 @@ taskSchema.methods.sideEffect = async function sideEffect(fn, params) {
   await this.save();
 
   return result;
-}
+};
 
 module.exports = taskSchema;

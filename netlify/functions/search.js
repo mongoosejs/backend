@@ -28,13 +28,12 @@ const uri = process.env.MONGODB_CONNECTION_STRING;
 
 module.exports = extrovert.toNetlifyFunction(async function search(params) {
   params = new SearchParams(params);
-  let Content;
   if (conn == null) {
     conn = mongoose.createConnection(uri);
     await conn.asPromise();
   }
 
-  Content = conn.model('Content', contentSchema, 'Content');
+  const Content = conn.model('Content', contentSchema, 'Content');
 
   const query = params.search;
   const version = params.version ? +params.version.replace(/\.x$/, '') : null;

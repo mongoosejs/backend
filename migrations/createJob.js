@@ -18,7 +18,7 @@ async function run() {
     url: 'https://careers.localizejs.com/jobs/B_3hYIHn4p-4/senior-full-stack-engineer-remote',
     location: 'Anywhere',
     logo: '//images.ctfassets.net/3ouphkrynjol/3mfb7HH2YowrPxX9C6ik6H/723034bcb4e99349663c4bc8223fb8b6/localizejs.com.png'
-  }
+  };
   await Job.findOneAndUpdate(filter, update, { upsert: true });
 
   process.exit(0);

@@ -2,9 +2,10 @@
 
 const TaskSchema = require('../src/db/task');
 const assert = require('assert');
-const sinon = require('sinon');
-const githubOAuth = require('../src/integrations/githubOAuth');
 const createReleaseFromChangelog = require('../src/actions/createReleaseFromChangelog');
+const { describe, it } = require('mocha');
+const githubOAuth = require('../src/integrations/githubOAuth');
+const sinon = require('sinon');
 
 const changelog = `
 6.1.1 / 2021-12-09

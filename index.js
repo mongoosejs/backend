@@ -40,7 +40,7 @@ app.use('/.netlify/functions', cors(), express.json(), function netlifyFunctions
         } catch (err) {}
         return res.status(400).json(data);
       }
-      res.json(JSON.parse(result.body))
+      res.json(JSON.parse(result.body));
     }).
     catch(err => {
       res.status(500).json({ message: err.message, stack: err.stack, extra: err.extra });
@@ -65,7 +65,7 @@ app.use(
   )
 );
 
-(async function () {
+(async function() {
   const db = await connect();
   app.use('/studio', studio('/studio/api', db));
 
