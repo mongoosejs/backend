@@ -67,7 +67,7 @@ app.use(
 
 (async function() {
   const db = await connect();
-  app.use('/studio', studio('/studio/api', db));
+  app.use('/studio', await studio('/studio/api', db));
 
   app.listen(8888);
   console.log('Listening on port 8888');
