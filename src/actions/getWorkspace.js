@@ -2,7 +2,6 @@
 
 const Archetype = require('archetype');
 const connect = require('../../src/db');
-const extrovert = require('extrovert');
 
 const GetWorkspaceParams = new Archetype({
   apiKey: {
@@ -18,5 +17,6 @@ module.exports = async function getWorkspace(params) {
   const { Workspace } = db.models;
 
   const workspace = await Workspace.findOne({ apiKey }).orFail();
+
   return { workspace };
 };

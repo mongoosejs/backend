@@ -48,8 +48,8 @@ module.exports = async function inviteToWorkspace(params) {
 
   const isAlreadyMember = await User.exists(
     { _id: { $in: workspace.members.map(member => member.userId) },
-    githubUsername
-  });
+      githubUsername
+    });
   if (isAlreadyMember) {
     throw new Error(`${githubUsername} is already a member of this workspace`);
   }

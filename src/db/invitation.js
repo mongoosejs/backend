@@ -13,6 +13,9 @@ const invitationSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  email: {
+    type: String
+  },
   invitedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

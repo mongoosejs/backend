@@ -1,15 +1,15 @@
 'use strict';
 
+const { afterEach, beforeEach, describe, it } = require('mocha');
 const assert = require('assert');
-const mongoose = require('mongoose');
-const inviteToWorkspace = require('../src/actions/inviteToWorkspace');
 const connect = require('../src/db');
+const inviteToWorkspace = require('../src/actions/inviteToWorkspace');
 
-describe('inviteToWorkspace', function () {
+describe('inviteToWorkspace', function() {
   let db, AccessToken, User, Workspace, Invitation;
   let user, workspace, accessToken;
 
-  beforeEach(async function () {
+  beforeEach(async function() {
     // Connect to the real database
     db = await connect();
     ({ AccessToken, User, Workspace, Invitation } = db.models);
@@ -41,7 +41,7 @@ describe('inviteToWorkspace', function () {
     });
   });
 
-  afterEach(async function () {
+  afterEach(async function() {
     // Cleanup after tests
     await AccessToken.deleteMany({});
     await User.deleteMany({});
@@ -49,7 +49,7 @@ describe('inviteToWorkspace', function () {
     await Invitation.deleteMany({});
   });
 
-  it('should invite a user successfully', async function () {
+  it('should invite a user successfully', async function() {
     const result = await inviteToWorkspace({
       authorization: accessToken._id.toString(),
       workspaceId: workspace._id,
@@ -67,8 +67,8 @@ describe('inviteToWorkspace', function () {
     assert.strictEqual(invitationInDb.workspaceId.toString(), workspace._id.toString());
   });
 
-  
-  it('should fail if user is already a member of the workspace', async function () {
+
+  it('should fail if user is already a member of the workspace', async function() {
     const invitedUser = await User.create({
       name: 'Jane Smith',
       email: 'janesmith@example.com',
@@ -91,4 +91,3 @@ describe('inviteToWorkspace', function () {
     );
   });
 });
-

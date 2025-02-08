@@ -19,6 +19,9 @@ const userSchema = new mongoose.Schema({
   },
   githubUserId: {
     type: String
+  },
+  isFreeUser: {
+    type: Boolean
   }
 }, { timestamps: true, id: false });
 
