@@ -46,8 +46,7 @@ const workspaceSchema = new mongoose.Schema({
   },
   subscriptionTier: {
     type: String,
-    enum: ['pro'],
-    required: true
+    enum: ['pro']
   }
 }, { timestamps: true, id: false });
 
