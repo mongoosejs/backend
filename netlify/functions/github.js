@@ -42,7 +42,7 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   };
 
   const user = await User.findOneAndUpdate(
-    { $or: [{ githubUserId }, { email }] },
+    { githubUsername },
     {
       $set,
       $setOnInsert
