@@ -22,7 +22,7 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   const workspaceId = params.workspaceId;
 
   const db = await connect();
-  const { AccessToken, User, Workspace } = db.models;
+  const { AccessToken, Invitation, User, Workspace } = db.models;
 
   const workspace = await Workspace.findById(workspaceId).orFail();
 
@@ -54,7 +54,27 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
     userId: user._id
   });
 
-  const roles = workspace.members.find(member => member.userId.toString() === user._id.toString())?.roles ?? null;
+  const member = workspace.members.find(member => member.userId.toString() === user._id.toString());
+  let roles = null;
+  if (member == null) {
+    const invitation = await Invitation.findOne({
+      githubUsername,
+      workspaceId,
+      status: 'pending'
+    });
+    if (invitation != null) {
+      workspace.members.push({ userId: user._id, roles: invitation.roles });
+      await workspace.save();
+
+      invitation.status = 'accepted';
+      await invitation.save();
+
+      roles = invitation.roles;
+    }
+  } else {
+    roles = member.roles;
+  }
+
 
   return { user, accessToken, roles };
 });

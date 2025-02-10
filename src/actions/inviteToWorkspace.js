@@ -18,6 +18,9 @@ const InviteToWorkspaceParams = new Archetype({
     $type: 'string',
     $required: true
   },
+  email: {
+    $type: 'string'
+  },
   roles: {
     $type: ['string'],
     $required: true,
@@ -26,7 +29,7 @@ const InviteToWorkspaceParams = new Archetype({
 }).compile('InviteToWorkspaceParams');
 
 module.exports = async function inviteToWorkspace(params) {
-  const { authorization, githubUsername, roles, workspaceId } = new InviteToWorkspaceParams(params);
+  const { authorization, githubUsername, email, roles, workspaceId } = new InviteToWorkspaceParams(params);
 
   const db = await connect();
   const { AccessToken, User, Workspace, Invitation } = db.models;
@@ -57,7 +60,7 @@ module.exports = async function inviteToWorkspace(params) {
   // Create or update an invitation
   const invitation = await Invitation.findOneAndUpdate(
     { workspaceId: workspace._id, githubUsername },
-    { invitedBy: invitedByUserId, roles, status: 'pending' },
+    { invitedBy: invitedByUserId, roles, email, status: 'pending' },
     { upsert: true, new: true }
   );
 
