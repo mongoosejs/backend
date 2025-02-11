@@ -32,20 +32,16 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   const { id: githubUserId, notification_email: email, avatar_url: picture, name, login: githubUsername } = userData;
 
   const $set = {
-    githubUserId
-  };
-  const $setOnInsert = {
+    githubUserId,
     email,
     picture,
-    name,
-    githubUsername
+    name
   };
 
   const user = await User.findOneAndUpdate(
     { githubUsername },
     {
-      $set,
-      $setOnInsert
+      $set
     },
     { upsert: true, returnDocument: 'after' }
   );
