@@ -12,6 +12,7 @@
     "extrovert": "0.0.26",
     "mongoose": "8.x",
     "ramda": "0.28.0",
+    "stripe": "9.9.0",
     "time-commando": "1.0.1"
   },
   "devDependencies": {

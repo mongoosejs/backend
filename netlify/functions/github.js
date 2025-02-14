@@ -5,6 +5,7 @@ const connect = require('../../src/db');
 const extrovert = require('extrovert');
 const githubOAuth = require('../../src/integrations/githubOAuth');
 const mongoose = require('mongoose');
+const stripe = require('../../src/integrations/stripe');
 
 const GithubOAuthParams = new Archetype({
   code: {
@@ -66,11 +67,16 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
       await invitation.save();
 
       roles = invitation.roles;
+
+      if (workspace.stripeSubscriptionId && !user.isFreeUser) {
+        const users = await User.find({ _id: { $in: workspace.members.map(member => member.userId) }, isFreeUser: { $ne: true } });
+        const seats = users.length;
+        await stripe.updateSubscriptionSeats(workspace.stripeSubscriptionId, seats);
+      }
     }
   } else {
     roles = member.roles;
   }
-
 
   return { user, accessToken, roles };
 });

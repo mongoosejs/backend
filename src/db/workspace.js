@@ -35,18 +35,14 @@ const workspaceSchema = new mongoose.Schema({
     required: true
   },
   stripeCustomerId: {
-    type: String,
-    unique: true,
-    sparse: true
+    type: String
   },
   stripeSubscriptionId: {
-    type: String,
-    unique: true,
-    sparse: true
+    type: String
   },
   subscriptionTier: {
     type: String,
-    enum: ['pro']
+    enum: ['free', 'pro']
   }
 }, { timestamps: true, id: false });
 
