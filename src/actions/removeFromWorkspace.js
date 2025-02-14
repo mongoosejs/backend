@@ -30,7 +30,7 @@ module.exports = async function removeFromWorkspace(params) {
   if (accessToken.expiresAt < new Date()) {
     throw new Error('Access token has expired');
   }
-  const initiatedByUserId = accessToken._id;
+  const initiatedByUserId = accessToken.userId;
 
   const workspace = await Workspace.findById(workspaceId).orFail(new Error('Workspace not found'));
   const initiatedByUserRoles = workspace.members.find(member => member.userId.toString() === initiatedByUserId.toString())?.roles;
