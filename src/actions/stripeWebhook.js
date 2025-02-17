@@ -26,7 +26,7 @@ const StripeWebhookParams = new Archetype({
 }).compile('StripeWebhookParams');
 
 module.exports = async function stripeWebhook(params, req) {
-  console.log('AB', req, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
+  console.log('AB', req, process.env.STRIPE_WEBHOOK_SECRET);
   try {
     stripe.client.webhooks.constructEvent(req.rawBody, req.headers['stripe-signature'], process.env.STRIPE_WEBHOOK_SECRET);
   } catch (err) {
