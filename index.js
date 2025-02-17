@@ -19,7 +19,7 @@ const topLevelFiles = new Set(
   fs.readdirSync('./public').filter(file => file.endsWith('.html'))
 );
 
-app.use('/.netlify/functions', cors(), express.json(), function netlifyFunctionsMiddleware(req, res) {
+app.use('/.netlify/functions', cors(), express.json({ verify: (req, res, buf) => { req.rawBody = buf; } }), function netlifyFunctionsMiddleware(req, res) {
   const actionName = req.path.replace(/^\//, '');
   if (!netlifyFunctions.hasOwnProperty(actionName)) {
     throw new Error(`Action ${actionName} not found`);
@@ -29,6 +29,7 @@ app.use('/.netlify/functions', cors(), express.json(), function netlifyFunctions
   const params = {
     headers: req.headers,
     body: JSON.stringify(req.body),
+    rawBody: req.rawBody,
     queryStringParameters: req.query
   };
   action.handler(params).

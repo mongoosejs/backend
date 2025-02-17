@@ -48,4 +48,15 @@ const workspaceSchema = new mongoose.Schema({
 
 workspaceSchema.index({ apiKey: 1 }, { unique: true });
 
+workspaceSchema.virtual('pricePerSeat').get(function pricePerSeat() {
+  if (this.subscriptionTier === 'free') {
+    return 0;
+  }
+  if (this.subscriptionTier === 'pro') {
+    return 19;
+  }
+
+  return null;
+});
+
 module.exports = workspaceSchema;

@@ -3,6 +3,7 @@
 const Archetype = require('archetype');
 const connect = require('../../src/db');
 const mongoose = require('mongoose');
+const stripe = require('../integrations/stripe');
 
 const RemoveFromWorkspaceParams = new Archetype({
   authorization: {
@@ -21,7 +22,7 @@ const RemoveFromWorkspaceParams = new Archetype({
 
 module.exports = async function removeFromWorkspace(params) {
   const db = await connect();
-  const { AccessToken, Workspace } = db.models;
+  const { AccessToken, User, Workspace } = db.models;
 
   const { authorization, workspaceId, userId } = new RemoveFromWorkspaceParams(params);
 
@@ -46,5 +47,11 @@ module.exports = async function removeFromWorkspace(params) {
   workspace.members.splice(memberIndex, 1);
   await workspace.save();
 
-  return { workspace };
+  const users = await User.find({ _id: { $in: workspace.members.map(member => member.userId) } });
+  if (workspace.stripeSubscriptionId) {
+    const seats = users.filter(user => !user.isFreeUser).length;
+    await stripe.updateSubscriptionSeats(workspace.stripeSubscriptionId, seats);
+  }
+
+  return { workspace, users };
 };

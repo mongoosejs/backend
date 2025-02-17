@@ -48,6 +48,9 @@ module.exports = async function inviteToWorkspace(params) {
   if (inviterRoles == null || (!inviterRoles.includes('admin') && !inviterRoles.includes('owner'))) {
     throw new Error('Forbidden');
   }
+  if (workspace.subscriptionTier !== 'pro') {
+    throw new Error('Cannot invite user without creating a subscription');
+  }
 
   const isAlreadyMember = await User.exists(
     { _id: { $in: workspace.members.map(member => member.userId) },
