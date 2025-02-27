@@ -42,7 +42,7 @@ const workspaceSchema = new mongoose.Schema({
   },
   subscriptionTier: {
     type: String,
-    enum: ['free', 'pro']
+    enum: ['', 'free', 'pro']
   }
 }, { timestamps: true, id: false });
 
