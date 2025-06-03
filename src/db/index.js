@@ -8,6 +8,7 @@ const accessTokenSchema = require('./AccessToken');
 const invitationSchema = require('./invitation');
 const jobSchema = require('./Job');
 const openCollectiveSponsorSchema = require('./OpenCollectiveSponsor');
+const rateLimitSchema = require('./RateLimit');
 const subscriberSchema = require('./subscriber');
 const taskSchema = require('./task');
 const userSchema = require('./user');
@@ -24,6 +25,7 @@ module.exports = async function connect() {
   conn.model('Invitation', invitationSchema, 'Invitation');
   conn.model('Job', jobSchema, 'Job');
   conn.model('OpenCollectiveSponsor', openCollectiveSponsorSchema, 'OpenCollectiveSponsor');
+  conn.model('RateLimit', rateLimitSchema, 'RateLimit');
   conn.model('Subscriber', subscriberSchema, 'Subscriber');
   conn.model('Task', taskSchema, 'Task');
   conn.model('User', userSchema, 'User');
