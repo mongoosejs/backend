@@ -22,9 +22,9 @@ module.exports = async function createChatMessage(params) {
   const { authorization, messages } = new CreateChatMessageParams(params);
 
   const db = await connect();
-  const { AccessToken, RateLimit, User } = db.models;
+  const { AccessToken, RateLimit } = db.models;
 
-  await RateLimit.checkRateLimit('openai', 2);
+  await RateLimit.checkRateLimit('openai', 1000);
 
   // Find the user linked to the access token
   const accessToken = await AccessToken.findById(authorization).orFail(new Error('Invalid access token'));
