@@ -73,6 +73,11 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
         const seats = users.length;
         await stripe.updateSubscriptionSeats(workspace.stripeSubscriptionId, seats);
       }
+    } else if (workspace.subscriptionTier === 'free') {
+      workspace.members.push({ userId: user._id, roles: ['readonly'] });
+      await workspace.save();
+
+      roles = ['readonly'];
     }
   } else {
     roles = member.roles;
