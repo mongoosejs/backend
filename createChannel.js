@@ -22,7 +22,7 @@ async function run() {
     }
     r1.question('public or private? ', async function(status) {
       console.log('status', status, typeof status, status.toLowerCase());
-      if (status.toLowerCase == 'public') {
+      if (status.toLowerCase() == 'public') {
         status = false;
       } else if (status.toLowerCase() == 'private') {
         status = true;
