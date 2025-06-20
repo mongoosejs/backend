@@ -9,8 +9,7 @@ const workspaceSchema = new mongoose.Schema({
   },
   ownerId: {
     type: 'ObjectId',
-    ref: 'User',
-    required: true
+    ref: 'User'
   },
   apiKey: {
     type: String,
@@ -31,8 +30,7 @@ const workspaceSchema = new mongoose.Schema({
     }]
   }],
   baseUrl: {
-    type: String,
-    required: true
+    type: String
   },
   stripeCustomerId: {
     type: String

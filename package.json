@@ -13,7 +13,8 @@
     "mongoose": "8.x",
     "ramda": "0.28.0",
     "stripe": "9.9.0",
-    "time-commando": "1.0.1"
+    "time-commando": "1.0.1",
+    "vue": "3.x"
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",

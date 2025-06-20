@@ -41,18 +41,34 @@ module.exports = async function stripeWebhook(params, event) {
 
   if (type === 'checkout.session.completed') {
     const workspaceId = data?.object?.client_reference_id;
-    assert.ok(workspaceId, 'no workspace id found');
-    const workspace = await Workspace.findById(workspaceId).orFail();
-    assert.ok(!workspace.stripeSubscriptionId, 'workspace already has a subscription');
-    assert.ok(data.object.customer, 'no customer found in webhook');
-    assert.ok(data.object.subscription, 'no subscription found in webhook');
+    // If no workspace ID provided, create a new workspace with just API key and subscription details
+    if (!workspaceId && data?.object?.customer && data?.object?.subscription) {
+      // Get customer email from Stripe
+      const customer = await stripe.client.customers.retrieve(data.object.customer);
+      const customerEmail = customer.email ?? 'Auto-created workspace';
 
-    workspace.stripeCustomerId = data.object.customer;
-    workspace.stripeSubscriptionId = data.object.subscription;
-    workspace.subscriptionTier = 'pro';
-    await workspace.save();
+      const newWorkspace = new Workspace({
+        name: customerEmail,
+        stripeCustomerId: data.object.customer,
+        stripeSubscriptionId: data.object.subscription,
+        subscriptionTier: 'pro'
+      });
 
-    return { workspace };
+      await newWorkspace.save();
+      return { workspace: newWorkspace };
+    } else {
+      const workspace = await Workspace.findById(workspaceId).orFail();
+      assert.ok(!workspace.stripeSubscriptionId, 'workspace already has a subscription');
+      assert.ok(data.object.customer, 'no customer found in webhook');
+      assert.ok(data.object.subscription, 'no subscription found in webhook');
+
+      workspace.stripeCustomerId = data.object.customer;
+      workspace.stripeSubscriptionId = data.object.subscription;
+      workspace.subscriptionTier = 'pro';
+      await workspace.save();
+
+      return { workspace };
+    }
   }
 
   return {};
