@@ -14,7 +14,7 @@ module.exports = ({ task, conn }) => async function verifyGithubAccessToken(para
   const { authorization } = new VerifyGithubAccessTokenParams(params);
   
   const token = await task.sideEffect(function exists({ _id }) {
-    return AccessToken.findOne({ _id }).populate('subscriberId');
+    return AccessToken.findOne({ _id }).populate('userId');
   }, { _id: authorization });
 
   return { exists: !!token, token };
