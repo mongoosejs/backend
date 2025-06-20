@@ -13,7 +13,7 @@ jobs:
         include:
           - os: ubuntu-24.04
             mongo-os: ubuntu2404
-            mongo: 5.0.2
+            mongo: 8.0.7
     name: Node ${{ matrix.node }} MongoDB ${{ matrix.mongo }}
     steps:
       - uses: actions/checkout@v2
