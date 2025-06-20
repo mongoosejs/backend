@@ -9,10 +9,10 @@ jobs:
       fail-fast: false
       matrix:
         node: [20]
-        os: [ubuntu-20.04]
+        os: [ubuntu-24.04]
         include:
-          - os: ubuntu-20.04
-            mongo-os: ubuntu2004
+          - os: ubuntu-24.04
+            mongo-os: ubuntu2404
             mongo: 5.0.2
     name: Node ${{ matrix.node }} MongoDB ${{ matrix.mongo }}
     steps:
