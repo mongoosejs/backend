@@ -13,6 +13,11 @@ describe('getWorkspaceTeam', function() {
     db = await connect();
     ({ User, AccessToken, Workspace, Invitation } = db.models);
 
+    await User.deleteMany({});
+    await AccessToken.deleteMany({});
+    await Workspace.deleteMany({});
+    await Invitation.deleteMany({});
+
     // Create an admin user
     adminUser = await User.create({ email: 'admin@example.com', githubUsername: 'admin' });
 

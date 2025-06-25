@@ -49,15 +49,15 @@ module.exports = async function inviteToWorkspace(params) {
     throw new Error('Forbidden');
   }
   const users = await User.find({ _id: { $in: workspace.members.map(member => member.userId) } });
-  const numPaidUsers = users.filter(user => !user.isFreeUser).length;
+  const numPaidUsers = users.filter(user => !user.isFreeUser && !user.roles?.includes('readonly')).length;
   if (workspace.subscriptionTier !== 'pro' && numPaidUsers > 0) {
     throw new Error('Cannot invite user without creating a subscription');
   }
 
-  const isAlreadyMember = await User.exists(
-    { _id: { $in: workspace.members.map(member => member.userId) },
-      githubUsername
-    });
+  const isAlreadyMember = await User.exists({
+    _id: { $in: workspace.members.map(member => member.userId) },
+    githubUsername
+  });
   if (isAlreadyMember) {
     throw new Error(`${githubUsername} is already a member of this workspace`);
   }
