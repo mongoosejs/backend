@@ -18,7 +18,7 @@ const RemoveFromWorkspaceParams = new Archetype({
     $type: mongoose.Types.ObjectId,
     $required: true
   }
-}).compile('InviteToWorkspaceParams');
+}).compile('RemoveFromWorkspaceParams');
 
 module.exports = async function removeFromWorkspace(params) {
   const db = await connect();
