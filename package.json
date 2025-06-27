@@ -10,6 +10,7 @@
     "axios": "0.21.4",
     "cheerio": "1.0.0",
     "extrovert": "0.0.27",
+    "googleapis": "100.0.0",
     "mongoose": "8.x",
     "ramda": "0.28.0",
     "stripe": "9.9.0",
@@ -19,7 +20,7 @@
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",
     "@mongoosejs/migrations": "0.2.5",
-    "@mongoosejs/studio": "0.0.74",
+    "@mongoosejs/studio": "0.0.91",
     "cors": "2.8.5",
     "dotenv": "16.4.7",
     "eslint": "9.x",

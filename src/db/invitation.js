@@ -10,8 +10,7 @@ const invitationSchema = new mongoose.Schema({
     required: true
   },
   githubUsername: {
-    type: String,
-    required: true
+    type: String
   },
   email: {
     type: String
@@ -36,5 +35,11 @@ const invitationSchema = new mongoose.Schema({
     default: () => time.now() + 7 * time.oneDayMS
   }
 }, { timestamps: true, id: false });
+
+invitationSchema.post('validate', function () {
+  if (!this.email && !this.githubUsername) {
+    throw new Error('Either email or githubUsername is required');
+  }
+});
 
 module.exports = invitationSchema;

@@ -49,7 +49,10 @@ module.exports = async function inviteToWorkspace(params) {
     throw new Error('Forbidden');
   }
   const users = await User.find({ _id: { $in: workspace.members.map(member => member.userId) } });
-  const numPaidUsers = users.filter(user => !user.isFreeUser && !user.roles?.includes('dashboards')).length;
+  for (const user of users) {
+    user.roles = workspace.members.find(member => member.userId.toString() === user._id.toString())?.roles || [];
+  }
+  const numPaidUsers = users.filter(user => !user.isFreeUser && !user.roles.includes('dashboards')).length;
   if (workspace.subscriptionTier !== 'pro' && numPaidUsers > 0) {
     throw new Error('Cannot invite user without creating a subscription');
   }

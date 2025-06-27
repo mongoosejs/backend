@@ -20,11 +20,21 @@ const userSchema = new mongoose.Schema({
   githubUserId: {
     type: String
   },
+  googleUserId: {
+    type: String
+  },
   isFreeUser: {
     type: Boolean
   }
 }, { timestamps: true, id: false });
 
-userSchema.index({ githubUserId: 1 }, { unique: true });
+userSchema.post('validate', function() {
+  if (!this.githubUserId && !this.googleUserId) {
+    throw new Error('Either githubUserId or googleUserId must be set.')
+  }
+});
+
+userSchema.index({ githubUserId: 1 }, { unique: true, sparse: true });
+userSchema.index({ googleUserId: 1 }, { unique: true, sparse: true });
 
 module.exports = userSchema;
