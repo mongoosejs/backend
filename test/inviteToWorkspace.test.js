@@ -72,7 +72,8 @@ describe('inviteToWorkspace', function() {
     const invitedUser = await User.create({
       name: 'Jane Smith',
       email: 'janesmith@example.com',
-      githubUsername: 'janesmith'
+      githubUsername: 'janesmith',
+      githubUserId: '5678'
     });
 
     // Add the user directly as a member of the workspace

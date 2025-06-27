@@ -19,7 +19,7 @@ describe('getWorkspaceTeam', function() {
     await Invitation.deleteMany({});
 
     // Create an admin user
-    adminUser = await User.create({ email: 'admin@example.com', githubUsername: 'admin' });
+    adminUser = await User.create({ email: 'admin@example.com', githubUsername: 'admin', githubUserId: '0000' });
 
     // Create an access token for the admin
     adminAccessToken = await AccessToken.create({ userId: adminUser._id });
@@ -36,6 +36,7 @@ describe('getWorkspaceTeam', function() {
     // Create invitations with "pending" and "declined" statuses
     invitation1 = await Invitation.create({
       workspaceId: workspace._id,
+      githubUserId: '1234',
       githubUsername: 'user1',
       status: 'pending',
       invitedBy: adminUser._id,
@@ -44,6 +45,7 @@ describe('getWorkspaceTeam', function() {
 
     invitation2 = await Invitation.create({
       workspaceId: workspace._id,
+      githubUserId: '5678',
       githubUsername: 'user2',
       status: 'declined',
       invitedBy: adminUser._id,

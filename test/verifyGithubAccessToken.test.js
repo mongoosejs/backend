@@ -14,7 +14,7 @@ describe('verifyGithubAccessToken', function() {
     await User.deleteMany({});
     await AccessToken.deleteMany({});
 
-    user = await User.create({ email: 'test@example.com', githubUsername: 'test' });
+    user = await User.create({ email: 'test@example.com', githubUsername: 'test', githubUserId: '5678' });
     accessToken = await AccessToken.create({ userId: user._id });
 
     const task = { sideEffect: async (fn, params) => fn(params) };
