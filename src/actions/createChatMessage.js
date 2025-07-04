@@ -5,8 +5,10 @@ const connect = require('../../src/db');
 
 const CreateChatMessageParams = new Archetype({
   authorization: {
-    $type: 'string',
-    $required: true
+    $type: 'string'
+  },
+  modelDescriptions: {
+    $type: 'string'
   },
   messages: [{
     role: {
@@ -18,18 +20,61 @@ const CreateChatMessageParams = new Archetype({
   }]
 }).compile('CreateChatMessageParams');
 
+const systemPrompt = `
+You are a data querying assistant who writes scripts for users accessing MongoDB data using Node.js and Mongoose.
+
+Keep scripts concise. Avoid unnecessary comments, error handling, and temporary variables.
+
+Do not write any imports or require() statements, that will cause the script to break.
+
+If the user approves the script, the script will run in the Node.js server and then send the response via JSON to the client. Be aware that the result of the query will be serialized to JSON before being displayed to the user.
+
+Assume the user has pre-defined schemas and models. Do not define any new schemas or models for the user.
+
+Use async/await where possible. Assume top-level await is allowed.
+
+Write at most one script, unless the user explicitly asks for multiple scripts.
+
+Think carefully about the user's input and identify the models referred to by the user's query.
+
+Format output as Markdown, including code fences for any scripts the user requested.
+
+Add a brief text description of what the script does.
+
+If the user's query is best answered with a chart, return a Chart.js 4 configuration as \`return { $chart: chartJSConfig };\`. Disable ChartJS animation by default unless user asks for it. Set responsive: true, maintainAspectRatio: false options unless the user explicitly asks.
+
+Example output:
+
+The following script counts the number of users which are not deleted.
+
+\`\`\`javascript
+const users = await db.model('User').find({ isDeleted: false });
+return { numUsers: users.length };
+\`\`\`
+
+-----------
+
+Here is a description of the user's models. Assume these are the only models available in the system unless explicitly instructed otherwise by the user.
+`.trim();
+
 module.exports = async function createChatMessage(params) {
-  const { authorization, messages } = new CreateChatMessageParams(params);
+  const { authorization, modelDescriptions, messages } = new CreateChatMessageParams(params);
 
   const db = await connect();
   const { AccessToken, RateLimit } = db.models;
 
+  let userId = null;
+  if (authorization) {
+    const accessToken = await AccessToken.findById(authorization).orFail(new Error('Invalid access token'));
+    userId = accessToken.userId;
+  }
+
   await RateLimit.checkRateLimit('openai', 1000);
 
-  // Find the user linked to the access token
-  const accessToken = await AccessToken.findById(authorization).orFail(new Error('Invalid access token'));
-  const userId = accessToken.userId;
-
+  messages.unshift({
+    role: 'system',
+    content: systemPrompt + (modelDescriptions ?? '')
+  });
   const res = await getChatCompletion(messages);
 
   return {
@@ -52,6 +97,10 @@ async function getChatCompletion(messages, options = {}) {
       messages
     })
   });
+
+  if (!response.ok) {
+    throw new Error(`OpenAI API request failed with status ${response.status}: ${await response.text()}`);
+  }
 
   return await response.json();
 }
