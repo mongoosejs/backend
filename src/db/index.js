@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 let conn = null;
 
 const accessTokenSchema = require('./AccessToken');
+const dashboardResultSchema = require('./DashboardResult');
 const invitationSchema = require('./invitation');
 const jobSchema = require('./Job');
 const openCollectiveSponsorSchema = require('./OpenCollectiveSponsor');
@@ -22,6 +23,7 @@ module.exports = async function connect() {
     await conn.asPromise();
   }
   conn.model('AccessToken', accessTokenSchema, 'AccessToken');
+  conn.model('DashboardResult', dashboardResultSchema, 'DashboardResult');
   conn.model('Invitation', invitationSchema, 'Invitation');
   conn.model('Job', jobSchema, 'Job');
   conn.model('OpenCollectiveSponsor', openCollectiveSponsorSchema, 'OpenCollectiveSponsor');
