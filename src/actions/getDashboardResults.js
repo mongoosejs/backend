@@ -4,26 +4,20 @@ const Archetype = require('archetype');
 const connect = require('../../src/db');
 const mongoose = require('mongoose');
 
-const CompleteDashboardEvaluateParams = new Archetype({
+const GetDashboardResultsParams = new Archetype({
   authorization: {
     $type: 'string'
   },
-  dashboardResultId: {
+  dashboardId: {
     $type: mongoose.Types.ObjectId
   },
   workspaceId: {
     $type: mongoose.Types.ObjectId
-  },
-  finishedEvaluatingAt: {
-    $type: Date
-  },
-  result: {
-    $type: Archetype.Any
   }
-}).compile('CompleteDashboardEvaluateParams');
+}).compile('GetDashboardResultsParams');
 
-module.exports = async function completeDashboardEvaluate(params) {
-  const { authorization, dashboardResultId, workspaceId, finishedEvaluatingAt, result } = new CompleteDashboardEvaluateParams(params);
+module.exports = async function getDashboardResults(params) {
+  const { authorization, dashboardId, workspaceId } = new GetDashboardResultsParams(params);
 
   const db = await connect();
   const { AccessToken, DashboardResult, Workspace } = db.models;
@@ -38,17 +32,13 @@ module.exports = async function completeDashboardEvaluate(params) {
   const workspace = await Workspace.findById(workspaceId).orFail(new Error('Workspace not found'));
 
   const isAuthorized = workspace.members.some(member =>
-    member.userId.toString() === userId.toString() && member.roles.find(role => ['admin', 'owner', 'member'].includes(role))
+    member.userId.toString() === userId.toString() && member.roles.find(role => ['admin', 'owner', 'member', 'readonly', 'dashboards'].includes(role))
   );
   if (!isAuthorized) {
     throw new Error('Unauthorized');
   }
 
-  const dashboardResult = await DashboardResult.findById(dashboardResultId).orFail();
-  dashboardResult.finishedEvaluatingAt = finishedEvaluatingAt;
-  dashboardResult.result = result;
-  dashboardResult.status = 'completed';
-  await dashboardResult.save();
+  const dashboardResults = await DashboardResult.find({ dashboardId }).sort({ _id: -1 }).limit(10);
 
-  return { dashboardResult };
+  return { dashboardResults };
 };
