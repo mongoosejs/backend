@@ -17,7 +17,11 @@ const CreateChatMessageParams = new Archetype({
     content: {
       $type: 'string'
     }
-  }]
+  }],
+  model: {
+    $type: 'string',
+    $enum: ['gpt-4o', 'gpt-4.1-nano']
+  }
 }).compile('CreateChatMessageParams');
 
 const systemPrompt = `
@@ -58,7 +62,7 @@ Here is a description of the user's models. Assume these are the only models ava
 `.trim();
 
 module.exports = async function createChatMessage(params) {
-  const { authorization, modelDescriptions, messages } = new CreateChatMessageParams(params);
+  const { authorization, modelDescriptions, messages, model } = new CreateChatMessageParams(params);
 
   const db = await connect();
   const { AccessToken, RateLimit } = db.models;
@@ -75,7 +79,7 @@ module.exports = async function createChatMessage(params) {
     role: 'system',
     content: systemPrompt + (modelDescriptions ?? '')
   });
-  const res = await getChatCompletion(messages);
+  const res = await getChatCompletion(messages, { model });
 
   return {
     response: res.choices?.[0]?.message?.content,
@@ -91,9 +95,9 @@ async function getChatCompletion(messages, options = {}) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
       max_tokens: 2500,
       ...options,
+      model: options?.model || 'gpt-4o',
       messages
     })
   });
