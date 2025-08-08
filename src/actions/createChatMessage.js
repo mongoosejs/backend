@@ -47,6 +47,8 @@ Add a brief text description of what the script does.
 
 If the user's query is best answered with a chart, return a Chart.js 4 configuration as \`return { $chart: chartJSConfig };\`. Disable ChartJS animation by default unless user asks for it. Set responsive: true, maintainAspectRatio: false options unless the user explicitly asks.
 
+If the user\'s query is best answered by a map, return an object { $featureCollection } which contains a GeoJSON FeatureCollection
+
 Example output:
 
 The following script counts the number of users which are not deleted.
