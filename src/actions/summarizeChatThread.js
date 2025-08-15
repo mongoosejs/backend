@@ -17,7 +17,8 @@ const SummarizeChatThreadParams = new Archetype({
   }]
 }).compile('SummarizeChatThreadParams');
 
-const systemPrompt = 'Summarize the following chat thread in 6 words or less, as a helpful thread title';
+const systemPrompt = 'You are a helpful assistant that writes concise thread titles. ' +
+  'Return ONLY the title, no quotes or punctuation, 6 words or fewer.';
 
 module.exports = async function summarizeChatThread(params) {
   const { authorization, messages } = new SummarizeChatThreadParams(params);
@@ -36,11 +37,28 @@ module.exports = async function summarizeChatThread(params) {
 
   await RateLimit.checkRateLimit('openai', 1000);
 
-  messages.unshift({
-    role: 'system',
-    content: systemPrompt
-  });
-  const res = await getChatCompletion(messages);
+  const threadText = messages
+    .filter(m => m.role === 'user' || m.role === 'assistant')
+    .map(m => `${m.role.toUpperCase()}: ${m.content}`)
+    .join('\n')
+    .slice(0, 5000);
+
+  const res = await getChatCompletion(
+    [
+      { role: 'system', content: systemPrompt },
+      {
+        role: 'user',
+        content:
+          '`Summarize the following chat thread into a concise, helpful title (≤ 6 words).\n\n`' +
+          `${threadText}\n\n` +
+          'Return only the title.'
+      }
+    ],
+    {
+      max_tokens: 16,
+      temperature: 0.2
+    }
+  );
 
   return {
     response: res.choices?.[0]?.message?.content,
@@ -56,8 +74,7 @@ async function getChatCompletion(messages, options = {}) {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'gpt-4o',
-      max_tokens: 2500,
+      model: 'gpt-4o-mini',
       ...options,
       messages
     })
