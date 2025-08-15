@@ -19,8 +19,11 @@ const SummarizeChatThreadParams = new Archetype({
 
 const systemPrompt = 'Summarize the following chat thread in 6 words or less, as a helpful thread title';
 
-module.exports = async function createChatMessage(params) {
+module.exports = async function summarizeChatThread(params) {
   const { authorization, messages } = new SummarizeChatThreadParams(params);
+  if (!messages) {
+    throw new Error('Missing messages');
+  }
 
   const db = await connect();
   const { AccessToken, RateLimit } = db.models;

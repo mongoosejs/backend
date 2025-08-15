@@ -66,6 +66,10 @@ Here is a description of the user's models. Assume these are the only models ava
 module.exports = async function createChatMessage(params) {
   const { authorization, modelDescriptions, messages, model } = new CreateChatMessageParams(params);
 
+  if (!messages) {
+    throw new Error('Missing messages');
+  }
+
   const db = await connect();
   const { AccessToken, RateLimit } = db.models;
 
