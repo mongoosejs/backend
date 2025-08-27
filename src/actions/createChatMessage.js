@@ -31,7 +31,9 @@ Keep scripts concise. Avoid unnecessary comments, error handling, and temporary 
 
 Do not write any imports or require() statements, that will cause the script to break.
 
-If the user approves the script, the script will run in the Node.js server and then send the response via JSON to the client. Be aware that the result of the query will be serialized to JSON before being displayed to the user.
+If the user approves the script, the script will run in the Node.js server in a sandboxed vm.createContext() call with only 1 global variable: db, which contains the Mongoose connection. The script return value will then send the response via JSON to the client. Be aware that the result of the query will be serialized to JSON before being displayed to the user. MAKE SURE TO RETURN A VALUE FROM THE SCRIPT.
+
+Optimize scripts for readability first, followed by reliability, followed by performance. Avoid using the aggregation framework unless explicitly requested by the user. Use indexed fields in queries where possible.
 
 Assume the user has pre-defined schemas and models. Do not define any new schemas or models for the user.
 
