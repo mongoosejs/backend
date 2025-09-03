@@ -19,11 +19,19 @@ const CompleteDashboardEvaluateParams = new Archetype({
   },
   result: {
     $type: Archetype.Any
-  }
+  },
+  error: new Archetype({
+    message: {
+      $type: 'string'
+    },
+    extra: {
+      $type: 'string'
+    }
+  }).compile('ErrorParams')
 }).compile('CompleteDashboardEvaluateParams');
 
 module.exports = async function completeDashboardEvaluate(params) {
-  const { authorization, dashboardResultId, workspaceId, finishedEvaluatingAt, result } = new CompleteDashboardEvaluateParams(params);
+  const { authorization, dashboardResultId, workspaceId, finishedEvaluatingAt, result, error } = new CompleteDashboardEvaluateParams(params);
 
   const db = await connect();
   const { AccessToken, DashboardResult, Workspace } = db.models;
@@ -47,6 +55,7 @@ module.exports = async function completeDashboardEvaluate(params) {
   const dashboardResult = await DashboardResult.findById(dashboardResultId).orFail();
   dashboardResult.finishedEvaluatingAt = finishedEvaluatingAt;
   dashboardResult.result = result;
+  dashboardResult.error = error;
   dashboardResult.status = 'completed';
   await dashboardResult.save();
 
