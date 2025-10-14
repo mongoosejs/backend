@@ -18,8 +18,8 @@ const UpdateWorkspaceMemberParams = new Archetype({
     $type: mongoose.Types.ObjectId,
     $required: true
   },
-  role: {
-    $type: 'string',
+  roles: {
+    $type: ['string'],
     $required: true,
     $enum: ['admin', 'member', 'readonly', 'dashboards']
   }
@@ -29,7 +29,7 @@ module.exports = async function updateWorkspaceMember(params) {
   const db = await connect();
   const { AccessToken, User, Workspace } = db.models;
 
-  const { authorization, workspaceId, userId, role } = new UpdateWorkspaceMemberParams(params);
+  const { authorization, workspaceId, userId, roles } = new UpdateWorkspaceMemberParams(params);
 
   const accessToken = await AccessToken.findById(authorization).orFail(new Error('Invalid or expired access token'));
   if (accessToken.expiresAt < new Date()) {
@@ -48,7 +48,7 @@ module.exports = async function updateWorkspaceMember(params) {
     throw new Error('Member not found in the workspace');
   }
 
-  member.roles = [role];
+  member.roles = roles;
   await workspace.save();
 
   const users = await User.find({ _id: { $in: workspace.members.map(currentMember => currentMember.userId) } });
