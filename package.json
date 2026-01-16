@@ -31,6 +31,8 @@
   "scripts": {
     "seed": "env NODE_ENV=development node ./seed",
     "start": "node .",
+    "start:local": "env NODE_ENV=local node .",
+    "start:development": "env NODE_ENV=development node .",
     "test": "env NODE_ENV=test mocha -r ./config test/*.test.js",
     "lint": "eslint ."
   }
