@@ -4,7 +4,11 @@ const Archetype = require('archetype');
 const connect = require('../../src/db');
 const slack = require('../integrations/slack');
 
-const NotifySlackPayload = new Archetype({
+const NotifySlackParams = new Archetype({
+  workspaceId: {
+    $type: 'string',
+    $required: true
+  },
   modelName: {
     $type: 'string',
     $required: true
@@ -17,19 +21,19 @@ const NotifySlackPayload = new Archetype({
     $type: 'string',
     $required: true
   }
-}).compile('NotifySlackPayload');
+}).compile('NotifySlackParams');
 
 module.exports = async function notifySlack(params) {
+  const { workspaceId, modelName, documentId, purpose } = new NotifySlackParams(params);
+
   const db = await connect();
   const { Workspace } = db.models;
 
-  const workspace = await Workspace.findById(params.workspaceId).orFail();
+  const workspace = await Workspace.findById(workspaceId).orFail();
 
   if (!workspace.slackWebhooks || workspace.slackWebhooks.length === 0) {
     throw new Error('Workspace does not have any Slack webhook URLs configured');
   }
-
-  const { modelName, documentId, purpose } = new NotifySlackPayload(params.payload || {});
 
   const blocks = [
     {
