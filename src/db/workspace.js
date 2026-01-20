@@ -60,6 +60,25 @@ const workspaceSchema = new mongoose.Schema({
       type: Boolean,
       default: true
     }
+  }],
+  discordWebhooks: [{
+    _id: false,
+    url: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String
+    },
+    purposes: [{
+      type: String,
+      required: true,
+      enum: ['documentCreated']
+    }],
+    enabled: {
+      type: Boolean,
+      default: true
+    }
   }]
 }, { timestamps: true, id: false });
 
