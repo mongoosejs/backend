@@ -6,13 +6,7 @@ const extrovert = require('extrovert');
 const mongoose = require('mongoose');
 
 let conn = null;
-const contentSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  url: { type: String, required: true },
-  version: { type: String },
-  versionNumber: { type: Number }
-});
+const contentSchema = require('../../src/db/content');
 
 const SearchParams = new Archetype({
   version: {

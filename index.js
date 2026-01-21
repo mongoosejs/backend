@@ -68,7 +68,9 @@ app.use(
 
 (async function() {
   const db = await connect();
-  app.use('/studio', await studio('/studio/api', db));
+  app.use('/studio', await studio('/studio/api', db, {
+    openAIAPIKey: process.env.OPENAI_API_KEY || null
+  }));
 
   app.listen(7777);
   console.log('Listening on port 7777');
