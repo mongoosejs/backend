@@ -34,7 +34,7 @@ module.exports = extrovert.toNetlifyFunction(async function search(params) {
   let results = await Content.aggregate([
     {
       $search: {
-        index: 'mongoose-content',
+        index: 'mongoose-docs-content',
         compound: {
           must: [
             ...(version ? [{
