@@ -20,7 +20,7 @@ const uri = process.env.MONGODB_CONNECTION_STRING;
 
 module.exports = async function connect() {
   if (conn == null) {
-    conn = mongoose.createConnection(uri);
+    conn = mongoose.createConnection(uri, { serverSelectionTimeoutMS: 5000 });
     await conn.asPromise();
   }
   conn.model('AccessToken', accessTokenSchema, 'AccessToken');
