@@ -2,8 +2,6 @@
 
 const mongoose = require('mongoose');
 
-let conn = null;
-
 const accessTokenSchema = require('./AccessToken');
 const contentSchema = require('./content');
 const dashboardResultSchema = require('./DashboardResult');
@@ -19,21 +17,20 @@ const workspaceSchema = require('./workspace');
 const uri = process.env.MONGODB_CONNECTION_STRING;
 
 module.exports = async function connect() {
-  if (conn == null) {
-    conn = mongoose.createConnection(uri, { serverSelectionTimeoutMS: 5000 });
-    await conn.asPromise();
+  await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
+  if (Object.keys(mongoose.models).length === 0) {
+    mongoose.model('AccessToken', accessTokenSchema, 'AccessToken');
+    mongoose.model('Content', contentSchema, 'Content');
+    mongoose.model('DashboardResult', dashboardResultSchema, 'DashboardResult');
+    mongoose.model('Invitation', invitationSchema, 'Invitation');
+    mongoose.model('Job', jobSchema, 'Job');
+    mongoose.model('OpenCollectiveSponsor', openCollectiveSponsorSchema, 'OpenCollectiveSponsor');
+    mongoose.model('RateLimit', rateLimitSchema, 'RateLimit');
+    mongoose.model('Subscriber', subscriberSchema, 'Subscriber');
+    mongoose.model('Task', taskSchema, 'Task');
+    mongoose.model('User', userSchema, 'User');
+    mongoose.model('Workspace', workspaceSchema, 'Workspace');
   }
-  conn.model('AccessToken', accessTokenSchema, 'AccessToken');
-  conn.model('Content', contentSchema, 'Content');
-  conn.model('DashboardResult', dashboardResultSchema, 'DashboardResult');
-  conn.model('Invitation', invitationSchema, 'Invitation');
-  conn.model('Job', jobSchema, 'Job');
-  conn.model('OpenCollectiveSponsor', openCollectiveSponsorSchema, 'OpenCollectiveSponsor');
-  conn.model('RateLimit', rateLimitSchema, 'RateLimit');
-  conn.model('Subscriber', subscriberSchema, 'Subscriber');
-  conn.model('Task', taskSchema, 'Task');
-  conn.model('User', userSchema, 'User');
-  conn.model('Workspace', workspaceSchema, 'Workspace');
 
-  return conn;
+  return mongoose.connection;
 };
