@@ -41,7 +41,45 @@ const workspaceSchema = new mongoose.Schema({
   subscriptionTier: {
     type: String,
     enum: ['', 'free', 'pro']
-  }
+  },
+  slackWebhooks: [{
+    _id: false,
+    url: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String
+    },
+    purposes: [{
+      type: String,
+      required: true,
+      enum: ['documentCreated']
+    }],
+    enabled: {
+      type: Boolean,
+      default: true
+    }
+  }],
+  discordWebhooks: [{
+    _id: false,
+    url: {
+      type: String,
+      required: true
+    },
+    name: {
+      type: String
+    },
+    purposes: [{
+      type: String,
+      required: true,
+      enum: ['documentCreated']
+    }],
+    enabled: {
+      type: Boolean,
+      default: true
+    }
+  }]
 }, { timestamps: true, id: false });
 
 workspaceSchema.index({ apiKey: 1 }, { unique: true });
