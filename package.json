@@ -16,7 +16,8 @@
     "random-word-slugs": "^0.1.7",
     "stripe": "9.9.0",
     "time-commando": "1.0.1",
-    "vue": "3.x"
+    "vue": "3.x",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",

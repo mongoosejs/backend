@@ -79,7 +79,6 @@ module.exports = extrovert.toNetlifyFunction(async function googleLogin(params) 
       workspace.stripeCustomerEmail.toLowerCase() === email.toLowerCase()
     ) {
       workspace.members.push({ userId: user._id, roles: ['owner'] });
-      workspace.stripeCustomerEmail = null;
       await workspace.save();
       roles = ['owner'];
     } else if (workspace.subscriptionTier === 'free') {

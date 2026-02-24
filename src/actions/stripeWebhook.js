@@ -11,6 +11,7 @@ const mailgun = require('../integrations/mailgun');
 const path = require('path');
 const { generateSlug } = require('random-word-slugs');
 const stripe = require('../integrations/stripe');
+const xss = require('xss');
 
 const StripeWebhookParams = new Archetype({
   type: {
@@ -57,8 +58,7 @@ module.exports = async function stripeWebhook(params, event) {
     const customer = await stripe.client.customers.retrieve(stripeCustomerId);
     const customerEmail = customer?.email?.toLowerCase?.() ?? null;
     const newApiKey = crypto.randomBytes(48).toString('hex');
-    const publicAppBaseUrl = process.env.MONGOOSE_STUDIO_PUBLIC_URL ||
-      new URL(process.env.GITHUB_REDIRECT_URI || process.env.GOOGLE_OAUTH_CALLBACK_URL).origin;
+    const publicAppBaseUrl = new URL(process.env.GITHUB_REDIRECT_URI).origin;
     const randomWorkspaceName = generateSlug(2, { format: 'kebab' });
 
     // If no workspace ID provided, create a new workspace with just API key and subscription details
@@ -104,7 +104,7 @@ module.exports = async function stripeWebhook(params, event) {
         const setupUrl = new URL('/login.html', publicAppBaseUrl);
         setupUrl.searchParams.set('workspaceId', workspace._id.toString());
         const $ = cheerio.load(newWorkspaceTemplate);
-        $('#workspace-name').text(workspace.name || randomWorkspaceName);
+        $('#workspace-name').text(xss(workspace.name || randomWorkspaceName));
         $('#setup-link').attr('href', setupUrl.toString());
         $('#setup-link-fallback').attr('href', setupUrl.toString()).text(setupUrl.toString());
         await mailgun.sendEmail({
