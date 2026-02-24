@@ -30,7 +30,8 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   const { access_token: token } = await githubOAuth.getAccessToken(code);
   const userData = await githubOAuth.getUser(token);
 
-  const { id: githubUserId, notification_email: email, avatar_url: picture, name, login: githubUsername } = userData;
+  const { id: githubUserId, notification_email: notificationEmail, avatar_url: picture, name, login: githubUsername } = userData;
+  const email = notificationEmail || await githubOAuth.getPrimaryEmail(token) || `${githubUsername}@users.noreply.github.com`;
 
   const $set = {
     githubUserId,
@@ -55,9 +56,12 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   let roles = null;
   if (member == null) {
     const invitation = await Invitation.findOne({
-      githubUsername,
       workspaceId,
-      status: 'pending'
+      status: 'pending',
+      $or: [
+        { githubUsername },
+        { email: email.toLowerCase() }
+      ]
     });
     if (invitation != null) {
       workspace.members.push({ userId: user._id, roles: invitation.roles });
@@ -73,6 +77,15 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
         const seats = users.length;
         await stripe.updateSubscriptionSeats(workspace.stripeSubscriptionId, seats);
       }
+    } else if (
+      workspace.members.length === 0 &&
+      workspace.stripeCustomerEmail &&
+      workspace.stripeCustomerEmail.toLowerCase() === email.toLowerCase()
+    ) {
+      workspace.members.push({ userId: user._id, roles: ['owner'] });
+      workspace.stripeCustomerEmail = null;
+      await workspace.save();
+      roles = ['owner'];
     } else if (workspace.subscriptionTier === 'free') {
       workspace.members.push({ userId: user._id, roles: ['readonly'] });
       await workspace.save();

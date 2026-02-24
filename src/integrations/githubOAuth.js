@@ -52,6 +52,22 @@ module.exports = {
     }
     return body;
   },
+  async getPrimaryEmail(token) {
+    const headers = {
+      authorization: `token ${token}`,
+      accept: 'application/vnd.github.v3+json'
+    };
+    const response = await fetch('https://api.github.com/user/emails', { headers });
+    const body = await response.json();
+    if (response.status >= 400) {
+      throw new Error(`Request failed with status ${response.status}: ${require('util').inspect(body)}`);
+    }
+    if (!Array.isArray(body)) {
+      return null;
+    }
+    const primary = body.find(email => email.primary && email.verified) || body.find(email => email.primary) || body[0];
+    return primary?.email || null;
+  },
   getAccessToken(code) {
     const body = {
       client_id: githubOAuthClientId,

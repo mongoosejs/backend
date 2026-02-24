@@ -17,7 +17,7 @@ describe('verifyGithubAccessToken', function() {
     user = await User.create({ email: 'test@example.com', githubUsername: 'test', githubUserId: '5678' });
     accessToken = await AccessToken.create({ userId: user._id });
 
-    const task = { sideEffect: async (fn, params) => fn(params) };
+    const task = { sideEffect: async(fn, params) => fn(params) };
     verifyGithubAccessToken = verifyGithubAccessTokenFactory({ task, conn: db });
   });
 

@@ -11,11 +11,13 @@
     "cheerio": "1.0.0",
     "extrovert": "0.2.0",
     "googleapis": "100.0.0",
-    "mongoose": "^9.0.0-0",
+    "mongoose": "9.x",
     "ramda": "0.28.0",
+    "random-word-slugs": "^0.1.7",
     "stripe": "9.9.0",
     "time-commando": "1.0.1",
-    "vue": "3.x"
+    "vue": "3.x",
+    "xss": "^1.0.15"
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",

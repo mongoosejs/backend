@@ -73,6 +73,14 @@ module.exports = extrovert.toNetlifyFunction(async function googleLogin(params) 
         const seats = users.length;
         await stripe.updateSubscriptionSeats(workspace.stripeSubscriptionId, seats);
       }
+    } else if (
+      workspace.members.length === 0 &&
+      workspace.stripeCustomerEmail &&
+      workspace.stripeCustomerEmail.toLowerCase() === email.toLowerCase()
+    ) {
+      workspace.members.push({ userId: user._id, roles: ['owner'] });
+      await workspace.save();
+      roles = ['owner'];
     } else if (workspace.subscriptionTier === 'free') {
       workspace.members.push({ userId: user._id, roles: ['readonly'] });
       await workspace.save();

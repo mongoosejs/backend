@@ -36,7 +36,7 @@ const invitationSchema = new mongoose.Schema({
   }
 }, { timestamps: true, id: false });
 
-invitationSchema.post('validate', function () {
+invitationSchema.post('validate', function() {
   if (!this.email && !this.githubUsername) {
     throw new Error('Either email or githubUsername is required');
   }

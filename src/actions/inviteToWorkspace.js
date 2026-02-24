@@ -19,7 +19,8 @@ const InviteToWorkspaceParams = new Archetype({
     $required: true
   },
   email: {
-    $type: 'string'
+    $type: 'string',
+    $transform: v => v == null ? null : v.toLowerCase()
   },
   roles: {
     $type: ['string'],
