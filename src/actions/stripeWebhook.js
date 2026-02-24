@@ -78,7 +78,8 @@ module.exports = async function stripeWebhook(params, event) {
         setupUrl.searchParams.set('workspaceId', newWorkspace._id.toString());
         const $ = cheerio.load(newWorkspaceTemplate);
         $('#workspace-name').text(newWorkspace.name);
-        $('#setup-link').attr('href', setupUrl.toString()).text(setupUrl.toString());
+        $('#setup-link').attr('href', setupUrl.toString());
+        $('#setup-link-fallback').attr('href', setupUrl.toString()).text(setupUrl.toString());
         await mailgun.sendEmail({
           to: customerEmail,
           from: process.env.MAILGUN_FROM_EMAIL,
@@ -104,7 +105,8 @@ module.exports = async function stripeWebhook(params, event) {
         setupUrl.searchParams.set('workspaceId', workspace._id.toString());
         const $ = cheerio.load(newWorkspaceTemplate);
         $('#workspace-name').text(workspace.name || randomWorkspaceName);
-        $('#setup-link').attr('href', setupUrl.toString()).text(setupUrl.toString());
+        $('#setup-link').attr('href', setupUrl.toString());
+        $('#setup-link-fallback').attr('href', setupUrl.toString()).text(setupUrl.toString());
         await mailgun.sendEmail({
           to: customerEmail,
           from: process.env.MAILGUN_FROM_EMAIL,

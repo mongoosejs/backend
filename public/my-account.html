@@ -27,6 +27,37 @@
       </section>
     </main>
 
+    <template id="emptyStateTemplate">
+      <div class="rounded-lg border border-dashed border-slate-300 p-4 text-slate-600">No workspaces found for this account.</div>
+    </template>
+
+    <template id="workspaceTemplate">
+      <section class="rounded-xl border border-slate-200 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <div class="inline-flex items-center gap-2">
+              <div class="text-lg font-semibold" data-workspace-name></div>
+              <button type="button" class="inline-flex items-center rounded-md border border-slate-300 bg-white p-1 text-slate-700 hover:bg-slate-50" data-edit-name aria-label="Edit workspace name">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75L3 17.25Zm18-11.5a1 1 0 0 0 0-1.41l-1.34-1.34a1 1 0 0 0-1.41 0l-1.18 1.18 3.75 3.75L21 5.75Z"/></svg>
+              </button>
+            </div>
+            <div class="text-sm text-slate-600">Workspace ID: <span data-workspace-id-label></span></div>
+          </div>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Tier: <span data-tier-label></span></span>
+            <span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Roles: <span data-roles-label></span></span>
+          </div>
+        </div>
+        <div class="mt-3 flex flex-wrap items-center gap-2">
+          <code class="max-w-full break-all rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm" data-key-view></code>
+          <button type="button" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" data-toggle-key data-visible="false" aria-label="Show API key">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12 5c-5.5 0-9.5 4.5-10.8 6.2a1.3 1.3 0 0 0 0 1.6C2.5 14.5 6.5 19 12 19s9.5-4.5 10.8-6.2a1.3 1.3 0 0 0 0-1.6C21.5 9.5 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg>
+          </button>
+          <button type="button" class="rounded-lg bg-[#880000] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#6d0000]" data-copy-key>Copy API Key</button>
+        </div>
+      </section>
+    </template>
+
     <script>
       (function() {
         const ACCESS_TOKEN_KEY = '_mongooseStudioAccessToken';
@@ -69,77 +100,117 @@
           const workspaces = data.workspaces || [];
 
           userSummary.textContent = user.email ? user.email : 'Signed in';
+          workspaceList.innerHTML = '';
 
           if (workspaces.length === 0) {
-            workspaceList.innerHTML = '<div class="rounded-lg border border-dashed border-slate-300 p-4 text-slate-600">No workspaces found for this account.</div>';
+            workspaceList.appendChild(createElementFromTemplate('emptyStateTemplate'));
             return;
           }
 
-          workspaceList.innerHTML = '';
           for (const workspace of workspaces) {
-            const item = document.createElement('section');
-            item.className = 'rounded-xl border border-slate-200 p-4';
+            const item = createElementFromTemplate('workspaceTemplate');
+            item.setAttribute('data-workspace-id', String(workspace._id));
 
             const roles = Array.isArray(workspace.roles) && workspace.roles.length ? workspace.roles.join(', ') : 'none';
             const apiKey = String(workspace.apiKey || '');
             const maskedApiKey = apiKey ? '\u2022'.repeat(Math.max(8, apiKey.length)) : '';
+            const canEditName = Array.isArray(workspace.roles) && (workspace.roles.includes('owner') || workspace.roles.includes('admin'));
 
-            item.innerHTML = [
-              '<div class="flex flex-wrap items-start justify-between gap-3">',
-              '<div>',
-              '<div class="text-lg font-semibold">' + escapeHtml(workspace.name || 'Unnamed Workspace') + '</div>',
-              '<div class="text-sm text-slate-600">Workspace ID: ' + escapeHtml(String(workspace._id)) + '</div>',
-              '</div>',
-              '<div class="flex flex-wrap gap-2 text-xs">',
-              '<span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Tier: ' + escapeHtml(workspace.subscriptionTier || 'unknown') + '</span>',
-              '<span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Roles: ' + escapeHtml(roles) + '</span>',
-              '</div>',
-              '</div>',
-              '<div class="mt-3 flex flex-wrap items-center gap-2">',
-              '<code class="max-w-full break-all rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm" data-key-view>' + escapeHtml(maskedApiKey) + '</code>',
-              '<button type="button" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" data-toggle-key data-key="' + escapeHtml(apiKey) + '" data-masked="' + escapeHtml(maskedApiKey) + '" data-visible="false" aria-label="Show API key">',
-              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12 5c-5.5 0-9.5 4.5-10.8 6.2a1.3 1.3 0 0 0 0 1.6C2.5 14.5 6.5 19 12 19s9.5-4.5 10.8-6.2a1.3 1.3 0 0 0 0-1.6C21.5 9.5 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg>',
-              '</button>',
-              '<button type="button" class="rounded-lg bg-[#880000] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#6d0000]" data-copy-key="' + escapeHtml(apiKey) + '">Copy API Key</button>',
-              '</div>'
-            ].join('');
+            item.querySelector('[data-workspace-name]').textContent = workspace.name || 'Unnamed Workspace';
+            item.querySelector('[data-workspace-id-label]').textContent = String(workspace._id);
+            item.querySelector('[data-tier-label]').textContent = workspace.subscriptionTier || 'unknown';
+            item.querySelector('[data-roles-label]').textContent = roles;
+
+            const editButton = item.querySelector('[data-edit-name]');
+            if (!canEditName) {
+              editButton.remove();
+            }
+
+            const keyView = item.querySelector('[data-key-view]');
+            keyView.textContent = maskedApiKey;
+
+            const toggleButton = item.querySelector('[data-toggle-key]');
+            toggleButton.setAttribute('data-key', apiKey);
+            toggleButton.setAttribute('data-masked', maskedApiKey);
+
+            const copyButton = item.querySelector('[data-copy-key]');
+            copyButton.setAttribute('data-copy-key', apiKey);
 
             workspaceList.appendChild(item);
-          }
 
-          workspaceList.querySelectorAll('button[data-copy-key]').forEach(function(button) {
-            button.addEventListener('click', async function() {
-              const key = button.getAttribute('data-copy-key') || '';
+            copyButton.addEventListener('click', async function() {
+              const key = copyButton.getAttribute('data-copy-key') || '';
               if (!key) {
                 return;
               }
               await navigator.clipboard.writeText(key);
-              const prev = button.textContent;
-              button.textContent = 'Copied';
+              const prev = copyButton.textContent;
+              copyButton.textContent = 'Copied';
               setTimeout(function() {
-                button.textContent = prev;
+                copyButton.textContent = prev;
               }, 1200);
             });
-          });
 
-          workspaceList.querySelectorAll('button[data-toggle-key]').forEach(function(button) {
-            button.addEventListener('click', function() {
-              const visible = button.getAttribute('data-visible') === 'true';
-              const code = button.parentElement.querySelector('[data-key-view]');
-              if (!code) {
+            toggleButton.addEventListener('click', function() {
+              const visible = toggleButton.getAttribute('data-visible') === 'true';
+              if (!keyView) {
                 return;
               }
               if (visible) {
-                code.textContent = button.getAttribute('data-masked') || '';
-                button.setAttribute('data-visible', 'false');
-                button.setAttribute('aria-label', 'Show API key');
+                keyView.textContent = toggleButton.getAttribute('data-masked') || '';
+                toggleButton.setAttribute('data-visible', 'false');
+                toggleButton.setAttribute('aria-label', 'Show API key');
               } else {
-                code.textContent = button.getAttribute('data-key') || '';
-                button.setAttribute('data-visible', 'true');
-                button.setAttribute('aria-label', 'Hide API key');
+                keyView.textContent = toggleButton.getAttribute('data-key') || '';
+                toggleButton.setAttribute('data-visible', 'true');
+                toggleButton.setAttribute('aria-label', 'Hide API key');
               }
             });
-          });
+
+            if (editButton) {
+              editButton.addEventListener('click', async function() {
+                const section = editButton.closest('section');
+                if (!section) {
+                  return;
+                }
+                const workspaceId = section.getAttribute('data-workspace-id');
+                const nameEl = section.querySelector('[data-workspace-name]');
+                if (!workspaceId || !nameEl) {
+                  return;
+                }
+                const currentName = nameEl.textContent || '';
+                const nextName = window.prompt('Update workspace name', currentName);
+                if (nextName == null || nextName.trim() === '' || nextName.trim() === currentName) {
+                  return;
+                }
+
+                try {
+                  const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+                  const { workspace: updatedWorkspace } = await postJson('/.netlify/functions/updateWorkspace', {
+                    workspaceId: workspaceId.trim(),
+                    name: nextName.trim()
+                  }, token);
+                  nameEl.textContent = updatedWorkspace.name || nextName.trim();
+                } catch (err) {
+                  showError(err.message || 'Failed to update workspace name');
+                }
+              });
+            }
+          }
+        }
+
+        function createElementFromTemplate(templateId) {
+          const template = document.getElementById(templateId);
+          if (!template) {
+            throw new Error('Missing template: ' + templateId);
+          }
+          const container = document.createElement('div');
+          container.innerHTML = template.innerHTML.trim();
+          const element = container.firstElementChild;
+          if (!element) {
+            throw new Error('Template produced no element: ' + templateId);
+          }
+          return element;
         }
 
         async function postJson(url, body, token) {
@@ -173,15 +244,6 @@
 
         function showError(message) {
           errorEl.textContent = message;
-        }
-
-        function escapeHtml(str) {
-          return String(str)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
         }
       })();
     </script>
