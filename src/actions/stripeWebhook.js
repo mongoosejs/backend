@@ -110,7 +110,7 @@ module.exports = async function stripeWebhook(params, event) {
         await mailgun.sendEmail({
           to: customerEmail,
           from: process.env.MAILGUN_FROM_EMAIL,
-          subject: 'Set up your Mongoose Studio account',
+          subject: 'Set up your Mongoose Studio Workspace',
           html: $.html()
         });
       }
