@@ -45,13 +45,13 @@ exports.sendEmail = async function sendEmail(params) {
   } catch (error) {
     if (error instanceof axios.AxiosError) {
       throw new IntegrationError(
-        `Error sending email: ${error.response.data?.message ?? error.response.data} (status code ${error.response.status})`,
+        `Error sending email: ${error.response?.data?.message ?? error.response?.data} (status code ${error.response?.status})`,
         'mailgun',
         error.response?.status,
         {
-          responseData: error.response.data,
-          message: error.response.data?.message,
-          status: error.response.status,
+          responseData: error.response?.data,
+          message: error.response?.data?.message,
+          status: error.response?.status,
           params
         }
       );
