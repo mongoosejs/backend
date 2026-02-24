@@ -3,10 +3,8 @@
 // Node.js has built-in form-data, but our version of Axios isn't compatible with it
 const FormData = require('form-data');
 const { IntegrationError } = require('../util/error');
-const Vue = require('vue');
 const assert = require('assert');
 const axios = require('axios');
-const { renderToString } = require('vue/server-renderer');
 
 const from = process.env.MAILGUN_FROM_EMAIL;
 assert.ok(from);
