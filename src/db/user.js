@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
 
 userSchema.post('validate', function() {
   if (!this.githubUserId && !this.googleUserId) {
-    throw new Error('Either githubUserId or googleUserId must be set.')
+    throw new Error('Either githubUserId or googleUserId must be set.');
   }
 });
 

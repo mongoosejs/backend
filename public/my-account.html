@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Account - Mongoose Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-900">
+    <main class="mx-auto w-full max-w-5xl px-4 py-8 md:py-10">
+      <section class="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70 md:p-8">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+          <div>
+            <h1 class="text-3xl font-bold tracking-tight">My Account</h1>
+            <p id="userSummary" class="mt-1 text-slate-600">Loading account...</p>
+          </div>
+          <button id="logoutButton" type="button" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Sign Out</button>
+        </div>
+
+        <div class="mt-4">
+          <a href="https://discord.gg/P3YCfKYxpy" target="_blank" rel="noopener noreferrer" class="inline-flex rounded-lg bg-[#880000] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#6d0000]">Get Help on Discord</a>
+        </div>
+
+        <p id="error" class="mt-4 text-sm font-semibold text-red-700" role="alert"></p>
+        <div id="workspaceList" class="mt-5 space-y-4"></div>
+        <a id="loginLink" class="mt-4 hidden text-sm font-semibold text-[#880000] underline decoration-[#880000]/40 underline-offset-2" href="/login.html">Go to login</a>
+      </section>
+    </main>
+
+    <script>
+      (function() {
+        const ACCESS_TOKEN_KEY = '_mongooseStudioAccessToken';
+
+        const userSummary = document.getElementById('userSummary');
+        const errorEl = document.getElementById('error');
+        const workspaceList = document.getElementById('workspaceList');
+        const logoutButton = document.getElementById('logoutButton');
+        const loginLink = document.getElementById('loginLink');
+
+        logoutButton.addEventListener('click', function() {
+          localStorage.removeItem(ACCESS_TOKEN_KEY);
+          window.location.href = '/login.html';
+        });
+
+        loadAccount();
+
+        async function loadAccount() {
+          const token = localStorage.getItem(ACCESS_TOKEN_KEY);
+          if (!token) {
+            userSummary.textContent = 'You are not signed in.';
+            loginLink.classList.remove('hidden');
+            return;
+          }
+
+          try {
+            const data = await postJson('/.netlify/functions/getMyAccount', {}, token);
+            renderAccount(data);
+          } catch (err) {
+            showError(err.message || 'Failed to load account');
+            if (/access token|authorization|expired|invalid/i.test(err.message || '')) {
+              localStorage.removeItem(ACCESS_TOKEN_KEY);
+              loginLink.classList.remove('hidden');
+            }
+          }
+        }
+
+        function renderAccount(data) {
+          const user = data.user || {};
+          const workspaces = data.workspaces || [];
+
+          userSummary.textContent = user.email ? user.email : 'Signed in';
+
+          if (workspaces.length === 0) {
+            workspaceList.innerHTML = '<div class="rounded-lg border border-dashed border-slate-300 p-4 text-slate-600">No workspaces found for this account.</div>';
+            return;
+          }
+
+          workspaceList.innerHTML = '';
+          for (const workspace of workspaces) {
+            const item = document.createElement('section');
+            item.className = 'rounded-xl border border-slate-200 p-4';
+
+            const roles = Array.isArray(workspace.roles) && workspace.roles.length ? workspace.roles.join(', ') : 'none';
+            const apiKey = String(workspace.apiKey || '');
+            const maskedApiKey = apiKey ? '\u2022'.repeat(Math.max(8, apiKey.length)) : '';
+
+            item.innerHTML = [
+              '<div class="flex flex-wrap items-start justify-between gap-3">',
+              '<div>',
+              '<div class="text-lg font-semibold">' + escapeHtml(workspace.name || 'Unnamed Workspace') + '</div>',
+              '<div class="text-sm text-slate-600">Workspace ID: ' + escapeHtml(String(workspace._id)) + '</div>',
+              '</div>',
+              '<div class="flex flex-wrap gap-2 text-xs">',
+              '<span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Tier: ' + escapeHtml(workspace.subscriptionTier || 'unknown') + '</span>',
+              '<span class="rounded-full border border-slate-300 px-2 py-1 text-slate-700">Roles: ' + escapeHtml(roles) + '</span>',
+              '</div>',
+              '</div>',
+              '<div class="mt-3 flex flex-wrap items-center gap-2">',
+              '<code class="max-w-full break-all rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs sm:text-sm" data-key-view>' + escapeHtml(maskedApiKey) + '</code>',
+              '<button type="button" class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:bg-slate-50" data-toggle-key data-key="' + escapeHtml(apiKey) + '" data-masked="' + escapeHtml(maskedApiKey) + '" data-visible="false" aria-label="Show API key">',
+              '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-4 w-4"><path d="M12 5c-5.5 0-9.5 4.5-10.8 6.2a1.3 1.3 0 0 0 0 1.6C2.5 14.5 6.5 19 12 19s9.5-4.5 10.8-6.2a1.3 1.3 0 0 0 0-1.6C21.5 9.5 17.5 5 12 5Zm0 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8Z"/></svg>',
+              '</button>',
+              '<button type="button" class="rounded-lg bg-[#880000] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#6d0000]" data-copy-key="' + escapeHtml(apiKey) + '">Copy API Key</button>',
+              '</div>'
+            ].join('');
+
+            workspaceList.appendChild(item);
+          }
+
+          workspaceList.querySelectorAll('button[data-copy-key]').forEach(function(button) {
+            button.addEventListener('click', async function() {
+              const key = button.getAttribute('data-copy-key') || '';
+              if (!key) {
+                return;
+              }
+              await navigator.clipboard.writeText(key);
+              const prev = button.textContent;
+              button.textContent = 'Copied';
+              setTimeout(function() {
+                button.textContent = prev;
+              }, 1200);
+            });
+          });
+
+          workspaceList.querySelectorAll('button[data-toggle-key]').forEach(function(button) {
+            button.addEventListener('click', function() {
+              const visible = button.getAttribute('data-visible') === 'true';
+              const code = button.parentElement.querySelector('[data-key-view]');
+              if (!code) {
+                return;
+              }
+              if (visible) {
+                code.textContent = button.getAttribute('data-masked') || '';
+                button.setAttribute('data-visible', 'false');
+                button.setAttribute('aria-label', 'Show API key');
+              } else {
+                code.textContent = button.getAttribute('data-key') || '';
+                button.setAttribute('data-visible', 'true');
+                button.setAttribute('aria-label', 'Hide API key');
+              }
+            });
+          });
+        }
+
+        async function postJson(url, body, token) {
+          const headers = { 'Content-Type': 'application/json' };
+          if (token) {
+            headers.authorization = token;
+          }
+
+          const res = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body || {})
+          });
+
+          const text = await res.text();
+          let data = {};
+          if (text) {
+            try {
+              data = JSON.parse(text);
+            } catch (err) {
+              data = { message: text };
+            }
+          }
+
+          if (!res.ok) {
+            throw new Error(data.message || 'Request failed');
+          }
+
+          return data;
+        }
+
+        function showError(message) {
+          errorEl.textContent = message;
+        }
+
+        function escapeHtml(str) {
+          return String(str)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#39;');
+        }
+      })();
+    </script>
+  </body>
+</html>

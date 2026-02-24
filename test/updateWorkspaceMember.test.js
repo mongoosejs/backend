@@ -60,7 +60,7 @@ describe('updateWorkspaceMember', function() {
       authorization: accessToken._id.toString(),
       workspaceId: workspace._id,
       userId: memberUser._id,
-      role: 'admin'
+      roles: ['admin']
     });
 
     assert.ok(result.workspace);

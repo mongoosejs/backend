@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mongoose Studio Account Setup</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-900">
+    <main class="mx-auto flex min-h-screen w-full max-w-xl items-center px-4">
+      <section class="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/70">
+        <h1 class="text-3xl font-bold tracking-tight">Set up your account</h1>
+        <p id="message" class="mt-2 text-slate-600">Sign in to connect your account and access your API key.</p>
+
+        <div class="mt-6 grid gap-3">
+          <button id="githubButton" type="button" class="w-full rounded-lg bg-[#880000] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6d0000] disabled:cursor-not-allowed disabled:opacity-60">Continue with GitHub</button>
+          <button id="googleButton" type="button" class="w-full rounded-lg bg-[#880000] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6d0000] disabled:cursor-not-allowed disabled:opacity-60">Continue with Google</button>
+        </div>
+
+        <p class="mt-4">
+          <a href="https://discord.gg/P3YCfKYxpy" target="_blank" rel="noopener noreferrer" class="text-sm font-semibold text-[#880000] underline decoration-[#880000]/40 underline-offset-2">Get Help on Discord</a>
+        </p>
+
+        <p id="error" class="mt-4 text-sm font-semibold text-red-700" role="alert"></p>
+        <p class="mt-4 text-sm text-slate-600">Already signed in? <a href="/my-account.html" class="font-semibold text-[#880000] underline decoration-[#880000]/40 underline-offset-2">Go to My Account</a></p>
+      </section>
+    </main>
+
+    <script>
+      (function() {
+        const ACCESS_TOKEN_KEY = '_mongooseStudioAccessToken';
+        const WORKSPACE_KEY = '_mongooseStudioSetupWorkspaceId';
+
+        const githubButton = document.getElementById('githubButton');
+        const googleButton = document.getElementById('googleButton');
+        const errorEl = document.getElementById('error');
+        const messageEl = document.getElementById('message');
+
+        const params = new URLSearchParams(window.location.search);
+        const workspaceIdFromQuery = params.get('workspaceId');
+        const provider = params.get('provider');
+        const code = params.get('code');
+
+        if (workspaceIdFromQuery) {
+          sessionStorage.setItem(WORKSPACE_KEY, workspaceIdFromQuery);
+        }
+
+        const workspaceId = workspaceIdFromQuery || sessionStorage.getItem(WORKSPACE_KEY);
+        if (!workspaceId) {
+          messageEl.textContent = 'Missing workspace information. Open the setup link from your email.';
+          githubButton.disabled = true;
+          googleButton.disabled = true;
+        }
+
+        if (provider && code) {
+          exchangeOAuthCode(provider, code, workspaceId);
+        }
+
+        githubButton.addEventListener('click', function() {
+          beginLogin('githubLogin');
+        });
+
+        googleButton.addEventListener('click', function() {
+          beginLogin('googleLogin');
+        });
+
+        async function beginLogin(endpoint) {
+          if (!workspaceId) {
+            return showError('Missing workspace ID. Use the setup link from your email.');
+          }
+          try {
+            setLoading(true);
+            const state = window.location.origin + window.location.pathname;
+            const response = await postJson('/.netlify/functions/' + endpoint, { state });
+            if (!response.url) {
+              throw new Error('Login URL not returned');
+            }
+            window.location.href = response.url;
+          } catch (err) {
+            showError(err.message || 'Failed to start login');
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        async function exchangeOAuthCode(provider, oauthCode, savedWorkspaceId) {
+          if (!savedWorkspaceId) {
+            return showError('Missing workspace ID. Please restart account setup from your email link.');
+          }
+
+          try {
+            setLoading(true);
+            messageEl.textContent = 'Finishing sign in...';
+            const endpoint = provider === 'google' ? 'google' : 'github';
+            const data = await postJson('/.netlify/functions/' + endpoint, {
+              code: oauthCode,
+              workspaceId: savedWorkspaceId
+            });
+
+            if (!data || !data.accessToken || !data.accessToken._id) {
+              throw new Error('Login did not return an access token');
+            }
+            if (!data.roles || data.roles.length === 0) {
+              throw new Error('Your account is not authorized for this workspace');
+            }
+
+            localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken._id);
+            window.location.replace('/my-account.html');
+          } catch (err) {
+            showError(err.message || 'Login failed');
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        async function postJson(url, body) {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body || {})
+          });
+
+          const text = await res.text();
+          let data = {};
+          if (text) {
+            try {
+              data = JSON.parse(text);
+            } catch (err) {
+              data = { message: text };
+            }
+          }
+
+          if (!res.ok) {
+            throw new Error(data.message || 'Request failed');
+          }
+
+          return data;
+        }
+
+        function setLoading(loading) {
+          githubButton.disabled = loading;
+          googleButton.disabled = loading;
+        }
+
+        function showError(message) {
+          errorEl.textContent = message;
+        }
+      })();
+    </script>
+  </body>
+</html>
