@@ -25,6 +25,7 @@ module.exports = async function connect() {
     mongoose.model('Invitation', invitationSchema, 'Invitation');
     mongoose.model('Job', jobSchema, 'Job');
     mongoose.model('OpenCollectiveSponsor', openCollectiveSponsorSchema, 'OpenCollectiveSponsor');
+    mongoose.model('PageView', require('./PageView'), 'pageviews');
     mongoose.model('RateLimit', rateLimitSchema, 'RateLimit');
     mongoose.model('Subscriber', subscriberSchema, 'Subscriber');
     mongoose.model('Task', taskSchema, 'Task');
