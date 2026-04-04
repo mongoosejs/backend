@@ -10,6 +10,9 @@ exports.verify = async function verify(response, remoteIp) {
   }
 
   const secret = process.env.RECAPTCHA_SECRET_KEY;
+  if (!secret) {
+    throw new Error('RECAPTCHA_SECRET_KEY environment variable is not set');
+  }
 
   const body = qs.stringify({
     secret,
