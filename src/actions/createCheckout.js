@@ -1,6 +1,7 @@
 'use strict';
 
 const Archetype = require('archetype');
+const connect = require('../db');
 const recaptcha = require('../integrations/recaptcha');
 const stripe = require('../integrations/stripe');
 
@@ -43,6 +44,15 @@ module.exports = async function createCheckout(params) {
   if (!recaptchaResult.success || recaptchaResult.score < 0.7 || recaptchaResult.action !== 'checkout') {
     throw new Error('Captcha verification failed');
   }
+
+  const db = await connect();
+  const { Contact } = db.models;
+
+  await Contact.findOneAndUpdate(
+    { email: email.toLowerCase() },
+    { $set: { name }, $setOnInsert: { email: email.toLowerCase() } },
+    { upsert: true }
+  );
 
   const priceId = priceIds[plan];
   if (!priceId) {

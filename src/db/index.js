@@ -3,6 +3,7 @@
 const mongoose = require('mongoose');
 
 const accessTokenSchema = require('./AccessToken');
+const contactSchema = require('./Contact');
 const contentSchema = require('./content');
 const dashboardResultSchema = require('./DashboardResult');
 const invitationSchema = require('./invitation');
@@ -20,6 +21,7 @@ module.exports = async function connect() {
   await mongoose.connect(uri, { serverSelectionTimeoutMS: 5000 });
   if (Object.keys(mongoose.models).length === 0) {
     mongoose.model('AccessToken', accessTokenSchema, 'AccessToken');
+    mongoose.model('Contact', contactSchema, 'Contact');
     mongoose.model('Content', contentSchema, 'Content');
     mongoose.model('DashboardResult', dashboardResultSchema, 'DashboardResult');
     mongoose.model('Invitation', invitationSchema, 'Invitation');
