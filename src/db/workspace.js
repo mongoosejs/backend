@@ -40,7 +40,7 @@ const workspaceSchema = new mongoose.Schema({
   },
   subscriptionTier: {
     type: String,
-    enum: ['', 'free', 'pro']
+    enum: ['', 'free', 'solo', 'pro']
   },
   stripeCustomerEmail: {
     type: String,
