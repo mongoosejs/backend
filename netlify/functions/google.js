@@ -24,7 +24,6 @@ module.exports = extrovert.toNetlifyFunction(async function googleLogin(params) 
   const { code, callbackUrl } = new GoogleOAuthParams(params);
 
   const workspaceId = params.workspaceId;
-  const workspace = await Workspace.findById(workspaceId).orFail();
 
   const { tokens } = await google.getToken(code, callbackUrl);
   const token = tokens['access_token'];
@@ -50,6 +49,12 @@ module.exports = extrovert.toNetlifyFunction(async function googleLogin(params) 
   const accessToken = await AccessToken.create({
     userId: user._id
   });
+
+  if (!workspaceId) {
+    return { user, accessToken };
+  }
+
+  const workspace = await Workspace.findById(workspaceId).orFail();
 
   const member = workspace.members.find(member => member.userId.toString() === user._id.toString());
   let roles = null;

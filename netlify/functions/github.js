@@ -25,8 +25,6 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   const db = await connect();
   const { AccessToken, Invitation, User, Workspace } = db.models;
 
-  const workspace = await Workspace.findById(workspaceId).orFail();
-
   const { access_token: token } = await githubOAuth.getAccessToken(code);
   const userData = await githubOAuth.getUser(token);
 
@@ -51,6 +49,12 @@ module.exports = extrovert.toNetlifyFunction(async function github(params) {
   const accessToken = await AccessToken.create({
     userId: user._id
   });
+
+  if (!workspaceId) {
+    return { user, accessToken };
+  }
+
+  const workspace = await Workspace.findById(workspaceId).orFail();
 
   const member = workspace.members.find(member => member.userId.toString() === user._id.toString());
   let roles = null;

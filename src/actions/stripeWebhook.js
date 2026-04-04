@@ -58,7 +58,7 @@ module.exports = async function stripeWebhook(params, event) {
     const customer = await stripe.client.customers.retrieve(stripeCustomerId);
     const customerEmail = customer?.email?.toLowerCase?.() ?? null;
     const newApiKey = crypto.randomBytes(48).toString('hex');
-    const publicAppBaseUrl = new URL(process.env.GITHUB_REDIRECT_URI).origin;
+    const publicAppBaseUrl = process.env.PUBLIC_APP_BASE_URL || 'https://studio.mongoosejs.io';
     const randomWorkspaceName = generateSlug(2, { format: 'kebab' });
 
     // If no workspace ID provided, create a new workspace with just API key and subscription details
