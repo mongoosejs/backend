@@ -41,6 +41,11 @@ app.use('/.netlify/functions', cors(), express.json({ verify: (req, res, buf) =>
         } catch (err) {}
         return res.status(400).json(data);
       }
+      const contentType = result.headers?.['Content-Type'] || result.headers?.['content-type'];
+      if (contentType && !contentType.includes('application/json')) {
+        res.set('Content-Type', contentType);
+        return res.status(result.statusCode || 200).send(result.body);
+      }
       res.json(JSON.parse(result.body));
     }).
     catch(err => {
