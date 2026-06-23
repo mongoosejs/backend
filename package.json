@@ -6,7 +6,7 @@
     "@octokit/auth-app": "2.4.3",
     "@octokit/auth-token": "2.5.0",
     "@slack/web-api": "^6.4.0",
-    "archetype": "0.13.1",
+    "archetype-js": "0.14.0",
     "axios": "0.30.0",
     "cheerio": "1.0.0",
     "extrovert": "0.2.0",
@@ -21,14 +21,16 @@
   },
   "devDependencies": {
     "@masteringjs/eslint-config": "0.1.1",
-    "@mongoosejs/migrations": "^0.4.0",
-    "@mongoosejs/studio": "^0.3.6",
+    "@mongoosejs/studio": "^0.5.10",
     "cors": "2.8.5",
     "dotenv": "16.4.7",
     "eslint": "9.x",
     "express": "4.x",
     "mocha": "11.7.1",
     "sinon": "15.x"
+  },
+  "overrides": {
+    "bson": "7.2.x"
   },
   "scripts": {
     "seed": "env NODE_ENV=development node ./seed",
