@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Authorize MCP Access | Mongoose Studio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="min-h-screen bg-gradient-to-br from-slate-100 via-white to-slate-200 text-slate-900">
+    <main class="mx-auto flex min-h-screen w-full max-w-xl items-center px-4 py-10">
+      <section class="w-full rounded-2xl border border-slate-200 bg-white p-8 shadow-xl shadow-slate-200/70">
+        <p class="text-sm font-semibold uppercase tracking-wide text-slate-500">Mongoose Studio</p>
+        <h1 id="heading" class="mt-1 text-3xl font-bold tracking-tight">Authorize access</h1>
+        <p id="message" class="mt-2 text-slate-600">Loading authorization request...</p>
+
+        <div id="signIn" class="mt-6 hidden">
+          <div class="grid grid-cols-2 gap-3">
+            <button id="githubButton" type="button" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+              Continue with GitHub
+            </button>
+            <button id="googleButton" type="button" class="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+              Continue with Google
+            </button>
+          </div>
+        </div>
+
+        <div id="consent" class="mt-6 hidden">
+          <dl class="divide-y divide-slate-200 rounded-xl border border-slate-200 bg-slate-50 px-4">
+            <div class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="text-sm font-semibold text-slate-600">AI client</dt>
+              <dd id="clientName" class="text-right text-sm font-semibold text-slate-900"></dd>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="text-sm font-semibold text-slate-600">Workspace</dt>
+              <dd id="workspaceName" class="text-right text-sm font-semibold text-slate-900"></dd>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="text-sm font-semibold text-slate-600">Studio deployment</dt>
+              <dd id="resource" class="break-all text-right text-sm text-slate-900"></dd>
+            </div>
+            <div class="flex items-baseline justify-between gap-4 py-3">
+              <dt class="text-sm font-semibold text-slate-600">Signed in as</dt>
+              <dd id="userName" class="text-right text-sm text-slate-900"></dd>
+            </div>
+          </dl>
+
+          <p class="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <span id="clientNameInline" class="font-semibold"></span> will be able to query this database on your behalf.
+            This is delegated access for an AI client. It does not change your own Mongoose Studio permissions, and you can
+            revoke or edit it at any time from <a href="/my-account.html" class="font-semibold underline">My Account</a>.
+          </p>
+
+          <div id="controls" class="mt-6 space-y-6"></div>
+
+          <div id="summary" class="mt-6 hidden">
+            <h2 class="text-sm font-semibold text-slate-600">Access being granted</h2>
+            <ul id="summaryList" class="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-800"></ul>
+          </div>
+
+          <div class="mt-8 flex flex-col gap-3 sm:flex-row-reverse">
+            <button id="approveButton" type="button" class="inline-flex flex-1 items-center justify-center rounded-lg bg-[#880000] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#6d0000] disabled:cursor-not-allowed disabled:opacity-60">
+              Authorize
+            </button>
+            <button id="denyButton" type="button" class="inline-flex flex-1 items-center justify-center rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60">
+              Deny
+            </button>
+          </div>
+        </div>
+
+        <p id="error" class="mt-4 text-sm font-semibold text-red-700" role="alert"></p>
+        <p class="mt-6 text-xs text-slate-500">
+          Mongoose Studio never shares your MongoDB connection string or credentials with the AI client. The client receives a
+          short-lived token that only works against this Studio deployment.
+        </p>
+      </section>
+    </main>
+
+    <script>
+      (function() {
+        const ACCESS_TOKEN_KEY = '_mongooseStudioAccessToken';
+        const REQUEST_KEY = '_mongooseStudioMCPAuthorizeRequest';
+        const OAUTH_PARAMS = [
+          'response_type',
+          'client_id',
+          'redirect_uri',
+          'resource',
+          'scope',
+          'state',
+          'code_challenge',
+          'code_challenge_method'
+        ];
+        const READ_PREFERENCE_RANK = { secondary: 0, secondaryPreferred: 1, primary: 2 };
+        const READ_PREFERENCE_LABELS = {
+          secondary: 'Secondary only',
+          secondaryPreferred: 'Secondary preferred',
+          primary: 'Primary allowed'
+        };
+        const MAX_TIME_MS_CHOICES = [1000, 5000, 10000, 30000];
+
+        const elements = {
+          heading: document.getElementById('heading'),
+          message: document.getElementById('message'),
+          error: document.getElementById('error'),
+          signIn: document.getElementById('signIn'),
+          consent: document.getElementById('consent'),
+          controls: document.getElementById('controls'),
+          summary: document.getElementById('summary'),
+          summaryList: document.getElementById('summaryList'),
+          approveButton: document.getElementById('approveButton'),
+          denyButton: document.getElementById('denyButton'),
+          githubButton: document.getElementById('githubButton'),
+          googleButton: document.getElementById('googleButton')
+        };
+
+        let request = readRequest();
+        let context = null;
+
+        start();
+
+        async function start() {
+          if (request == null) {
+            return fail('This page is opened by an AI client that is connecting to Mongoose Studio. It is missing the authorization request parameters.');
+          }
+
+          const search = new URLSearchParams(window.location.search);
+          try {
+            if (search.get('provider') && search.get('code')) {
+              await finishSignIn(search.get('provider'), search.get('code'));
+            }
+            await load();
+          } catch (err) {
+            fail(err.message);
+          }
+        }
+
+        async function load() {
+          context = await post('/mcp-oauth/MCPOAuthClient/getMCPAuthorizationRequest', request, accessToken());
+          document.getElementById('clientName').textContent = context.client.name;
+          document.getElementById('clientNameInline').textContent = context.client.name;
+          document.getElementById('workspaceName').textContent = context.workspace.name || '(unnamed workspace)';
+          document.getElementById('resource').textContent = context.resource;
+
+          if (context.user == null) {
+            elements.heading.textContent = 'Sign in to authorize ' + context.client.name;
+            elements.message.textContent = 'Sign in to your Mongoose Studio account to give ' + context.client.name +
+              ' access to the "' + (context.workspace.name || 'your') + '" workspace.';
+            elements.signIn.classList.remove('hidden');
+            return;
+          }
+
+          document.getElementById('userName').textContent = context.user.name || context.user.email || '';
+          elements.heading.textContent = 'Authorize ' + context.client.name;
+          elements.message.textContent = 'Review the database access you are delegating, then authorize.';
+          elements.signIn.classList.add('hidden');
+          elements.consent.classList.remove('hidden');
+          renderCapabilities(context.maximum);
+        }
+
+        // Only render a control when the user has more than one valid choice:
+        // every option must be a reduction of what the user already has.
+        function renderCapabilities(maximum) {
+          const accessOptions = maximum.write ?
+            [{ value: 'read', label: 'Read only' }, { value: 'write', label: 'Read and write' }] :
+            [{ value: 'read', label: 'Read only' }];
+          const readPreferenceOptions = Object.keys(READ_PREFERENCE_RANK).
+            filter(value => READ_PREFERENCE_RANK[value] <= READ_PREFERENCE_RANK[maximum.readPreference]).
+            map(value => ({ value, label: READ_PREFERENCE_LABELS[value] }));
+          const maxTimeMSOptions = MAX_TIME_MS_CHOICES.
+            filter(value => value <= maximum.maxTimeMS).
+            concat(MAX_TIME_MS_CHOICES.includes(maximum.maxTimeMS) ? [] : [maximum.maxTimeMS]).
+            sort((a, b) => a - b).
+            map(value => ({ value: String(value), label: formatMaxTimeMS(value) }));
+
+          const groups = [
+            { name: 'access', label: 'Access', options: accessOptions, selected: 'read' },
+            {
+              name: 'readPreference',
+              label: 'Read preference',
+              options: readPreferenceOptions,
+              selected: readPreferenceOptions.some(option => option.value === 'secondaryPreferred') ?
+                'secondaryPreferred' :
+                readPreferenceOptions[readPreferenceOptions.length - 1].value
+            },
+            {
+              name: 'maxTimeMS',
+              label: 'Maximum query execution time',
+              options: maxTimeMSOptions,
+              selected: maxTimeMSOptions.some(option => option.value === '5000') ?
+                '5000' :
+                maxTimeMSOptions[maxTimeMSOptions.length - 1].value
+            }
+          ];
+
+          elements.controls.innerHTML = '';
+          const fixed = [];
+          for (const group of groups) {
+            if (group.options.length < 2) {
+              fixed.push(group.label + ': ' + group.options[0].label);
+              const hidden = document.createElement('input');
+              hidden.type = 'hidden';
+              hidden.name = group.name;
+              hidden.value = group.options[0].value;
+              elements.controls.appendChild(hidden);
+              continue;
+            }
+            elements.controls.appendChild(renderGroup(group));
+          }
+
+          if (fixed.length > 0) {
+            elements.summary.classList.remove('hidden');
+            elements.summaryList.innerHTML = '';
+            for (const line of fixed) {
+              const item = document.createElement('li');
+              item.textContent = line;
+              elements.summaryList.appendChild(item);
+            }
+          }
+        }
+
+        function renderGroup(group) {
+          const fieldset = document.createElement('fieldset');
+          fieldset.innerHTML = '<legend class="text-sm font-semibold text-slate-700">' + group.label + '</legend>';
+          const list = document.createElement('div');
+          list.className = 'mt-2 space-y-2';
+          for (const option of group.options) {
+            const label = document.createElement('label');
+            label.className = 'flex cursor-pointer items-center gap-3 rounded-lg border border-slate-200 px-3 py-2 text-sm hover:bg-slate-50';
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = group.name;
+            input.value = option.value;
+            input.checked = option.value === group.selected;
+            input.className = 'h-4 w-4 accent-[#880000]';
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(option.label));
+            list.appendChild(label);
+          }
+          fieldset.appendChild(list);
+          return fieldset;
+        }
+
+        function selectedCapabilities() {
+          const access = selectedValue('access') || 'read';
+          return {
+            read: true,
+            write: access === 'write',
+            readPreference: selectedValue('readPreference') || context.maximum.readPreference,
+            maxTimeMS: Number(selectedValue('maxTimeMS') || context.maximum.maxTimeMS)
+          };
+        }
+
+        function selectedValue(name) {
+          const checked = elements.controls.querySelector('input[name="' + name + '"]:checked');
+          if (checked) {
+            return checked.value;
+          }
+          const hidden = elements.controls.querySelector('input[type="hidden"][name="' + name + '"]');
+          return hidden ? hidden.value : null;
+        }
+
+        elements.approveButton.addEventListener('click', async function() {
+          setBusy(true);
+          try {
+            const { redirect } = await post(
+              '/mcp-oauth/MCPOAuthGrant/approveMCPAuthorization',
+              { ...request, capabilities: selectedCapabilities() },
+              accessToken()
+            );
+            window.location.href = redirect;
+          } catch (err) {
+            setBusy(false);
+            showError(err.message);
+          }
+        });
+
+        elements.denyButton.addEventListener('click', async function() {
+          setBusy(true);
+          try {
+            const { redirect } = await post('/mcp-oauth/MCPOAuthClient/denyMCPAuthorization', request, accessToken());
+            window.location.href = redirect;
+          } catch (err) {
+            setBusy(false);
+            showError(err.message);
+          }
+        });
+
+        elements.githubButton.addEventListener('click', () => beginSignIn('githubLogin'));
+        elements.googleButton.addEventListener('click', () => beginSignIn('googleLogin'));
+
+        async function beginSignIn(endpoint) {
+          setBusy(true);
+          try {
+            // The OAuth request lives in sessionStorage because the sign in
+            // round trip comes back with only `provider` and `code` in the URL.
+            sessionStorage.setItem(REQUEST_KEY, JSON.stringify(request));
+            const state = window.location.origin + window.location.pathname;
+            const { url } = await post('/.netlify/functions/' + endpoint, { state });
+            if (!url) {
+              throw new Error('Sign in URL not returned');
+            }
+            window.location.href = url;
+          } catch (err) {
+            setBusy(false);
+            showError(err.message);
+          }
+        }
+
+        async function finishSignIn(provider, code) {
+          elements.message.textContent = 'Finishing sign in...';
+          const data = await post('/.netlify/functions/' + (provider === 'google' ? 'google' : 'github'), {
+            code,
+            workspaceId: await workspaceIdForSignIn()
+          });
+          if (!data || !data.accessToken || !data.accessToken._id) {
+            throw new Error('Sign in did not return an access token');
+          }
+          localStorage.setItem(ACCESS_TOKEN_KEY, data.accessToken._id);
+          // Drop `provider` and `code` so a refresh does not reuse them.
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+
+        async function workspaceIdForSignIn() {
+          const unauthenticated = await post('/mcp-oauth/MCPOAuthClient/getMCPAuthorizationRequest', request);
+          return unauthenticated.workspace._id;
+        }
+
+        function readRequest() {
+          const search = new URLSearchParams(window.location.search);
+          if (search.get('client_id') && search.get('redirect_uri')) {
+            const fromQuery = {};
+            for (const param of OAUTH_PARAMS) {
+              if (search.get(param) != null) {
+                fromQuery[param] = search.get(param);
+              }
+            }
+            sessionStorage.setItem(REQUEST_KEY, JSON.stringify(fromQuery));
+            return fromQuery;
+          }
+          try {
+            return JSON.parse(sessionStorage.getItem(REQUEST_KEY));
+          } catch (err) {
+            return null;
+          }
+        }
+
+        function accessToken() {
+          return localStorage.getItem(ACCESS_TOKEN_KEY);
+        }
+
+        async function post(path, body, authorization) {
+          const headers = { 'Content-Type': 'application/json' };
+          if (authorization) {
+            headers.Authorization = authorization;
+          }
+          const res = await fetch(path, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(body || {})
+          });
+          const text = await res.text();
+          let data = {};
+          if (text) {
+            try {
+              data = JSON.parse(text);
+            } catch (err) {
+              data = { message: text };
+            }
+          }
+          if (!res.ok) {
+            throw new Error(data.message || data.error_description || 'Request failed');
+          }
+          return data;
+        }
+
+        function formatMaxTimeMS(value) {
+          return value % 1000 === 0 ?
+            (value / 1000) + ' second' + (value === 1000 ? '' : 's') :
+            value + ' ms';
+        }
+
+        function setBusy(busy) {
+          for (const button of [elements.approveButton, elements.denyButton, elements.githubButton, elements.googleButton]) {
+            button.disabled = busy;
+          }
+        }
+
+        function showError(message) {
+          elements.error.textContent = message;
+        }
+
+        function fail(message) {
+          elements.heading.textContent = 'Cannot authorize';
+          elements.message.textContent = '';
+          elements.signIn.classList.add('hidden');
+          elements.consent.classList.add('hidden');
+          showError(message);
+        }
+      })();
+    </script>
+  </body>
+</html>

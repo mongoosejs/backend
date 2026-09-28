@@ -1,0 +1,16 @@
+# MCP OAuth. Every path here mirrors an action under src/actions/mcp-oauth, and
+# `src/mcpOAuthRouter.js` serves the same paths when running the mothership
+# locally. The authorization endpoint itself is the static /mcp-authorize page.
+/.well-known/oauth-authorization-server               /.netlify/functions/mcp-oauth-metadata                                    200
+/mcp-oauth/MCPOAuthClient/denyMCPAuthorization        /.netlify/functions/mcp-oauth-MCPOAuthClient-denyMCPAuthorization         200
+/mcp-oauth/MCPOAuthClient/getMCPAuthorizationRequest  /.netlify/functions/mcp-oauth-MCPOAuthClient-getMCPAuthorizationRequest   200
+/mcp-oauth/MCPOAuthGrant/approveMCPAuthorization      /.netlify/functions/mcp-oauth-MCPOAuthGrant-approveMCPAuthorization       200
+/mcp-oauth/MCPOAuthGrant/listMCPGrants                /.netlify/functions/mcp-oauth-MCPOAuthGrant-listMCPGrants                 200
+/mcp-oauth/MCPOAuthGrant/revokeMCPGrant               /.netlify/functions/mcp-oauth-MCPOAuthGrant-revokeMCPGrant                200
+/mcp-oauth/MCPOAuthGrant/updateMCPGrant               /.netlify/functions/mcp-oauth-MCPOAuthGrant-updateMCPGrant                200
+/mcp-oauth/MCPOAuthToken/introspectMCPAccessToken     /.netlify/functions/mcp-oauth-MCPOAuthToken-introspectMCPAccessToken      200
+/mcp-oauth/Workspace/registerMCPResource              /.netlify/functions/mcp-oauth-Workspace-registerMCPResource               200
+/mcp-oauth/metadata                                   /.netlify/functions/mcp-oauth-metadata                                    200
+/mcp-oauth/register                                   /.netlify/functions/mcp-oauth-register                                    200
+/mcp-oauth/revoke                                     /.netlify/functions/mcp-oauth-revoke                                      200
+/mcp-oauth/token                                      /.netlify/functions/mcp-oauth-token                                       200

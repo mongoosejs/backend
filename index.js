@@ -6,6 +6,7 @@ const cors = require('cors');
 const connect = require('./src/db');
 const express = require('express');
 const fs = require('fs');
+const mcpOAuthRouter = require('./src/mcpOAuthRouter');
 const studio = require('@mongoosejs/studio/express');
 
 const app = express();
@@ -52,6 +53,10 @@ app.use('/.netlify/functions', cors(), express.json({ verify: (req, res, buf) =>
       res.status(500).json({ message: err.message, stack: err.stack, extra: err.extra });
     });
 });
+
+// MCP OAuth endpoints for MCP clients like ChatGPT and Claude, plus the actions
+// behind the /mcp-authorize consent page.
+app.use(mcpOAuthRouter());
 
 app.use(
   function rewriteUrlForTopLevelFiles(req, res, next) {
