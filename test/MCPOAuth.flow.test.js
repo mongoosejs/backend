@@ -149,7 +149,7 @@ describe('MCP OAuth end to end', function() {
     });
     assert.strictEqual(tokens.status, 200);
     assert.strictEqual(tokens.body.token_type, 'Bearer');
-    assert.strictEqual(tokens.body.expires_in, 900);
+    assert.strictEqual(tokens.body.expires_in, 86400);
 
     // 6. Studio resolves the token on an MCP request.
     const introspected = await post('/mcp-oauth/MCPOAuthToken/introspectMCPAccessToken', {
@@ -163,7 +163,7 @@ describe('MCP OAuth end to end', function() {
     assert.strictEqual(introspected.body.permissions.maxTimeMS, 5000);
     assert.deepStrictEqual(introspected.body.permissions.roles, ['readonly']);
 
-    // 7. The access token expires quickly, so the client refreshes it.
+    // 7. Refreshing replaces the current access token and refresh token.
     const refreshed = await form('/mcp-oauth/token', {
       grant_type: 'refresh_token',
       refresh_token: tokens.body.refresh_token,

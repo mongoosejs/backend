@@ -259,13 +259,13 @@ describe('MCP OAuth', function() {
   });
 
   describe('token exchange', function() {
-    it('exchanges a code for a short-lived access token and a refresh token', async function() {
+    it('exchanges a code for an access token and a refresh token', async function() {
       const { code } = await authorize();
       const tokens = await exchange(code, { resource: RESOURCE });
 
       assert.strictEqual(tokens.token_type, 'Bearer');
       assert.strictEqual(tokens.scope, 'mcp');
-      assert.strictEqual(tokens.expires_in, 900);
+      assert.strictEqual(tokens.expires_in, 86400);
       assert.ok(tokens.access_token.startsWith('mcp_at_'));
       assert.ok(tokens.refresh_token.startsWith('mcp_rt_'));
     });

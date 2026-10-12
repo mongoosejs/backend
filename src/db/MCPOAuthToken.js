@@ -3,9 +3,10 @@
 const crypto = require('crypto');
 const mcpOAuthError = require('../util/mcpOAuthError');
 const mongoose = require('mongoose');
+const time = require('time-commando');
 
-const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
-const REFRESH_TOKEN_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+const ACCESS_TOKEN_TTL_MS = time.oneDayMS;
+const REFRESH_TOKEN_TTL_MS = 30 * time.oneDayMS;
 
 // Tokens are stored as SHA-256 hashes of the value the client holds, so a dump
 // of this collection cannot be replayed against Studio. A token is an opaque
@@ -30,7 +31,7 @@ const mcpOAuthTokenSchema = new mongoose.Schema({
     /**
      * Issue an access token and a refresh token for a grant, and return them in
      * the shape RFC 6749 expects from the token endpoint. Access tokens are
-     * deliberately short-lived: they are only a cached pointer to a grant that
+     * deliberately bounded: they are only a cached pointer to a grant that
      * the user can revoke or edit at any time.
      */
     async issuePair(grant) {
